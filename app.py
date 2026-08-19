@@ -365,9 +365,10 @@ if not owned:
 
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
-# For each enemy: show full enemy card, then the 6 recommended team cards underneath
+# For each enemy: the 6 recommended team cards underneath
 for enemy in enemies:
-    enemy_card(enemy)
+    st.write(f"Recommendations against {enemy.get('name')}")
+    # enemy_card(enemy)
 
     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
     if not recs:
