@@ -227,8 +227,8 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
             return
 
         # Render up to 6 recommendations in rows of 3 (responsive)
-        for row_start in range(0, len(recommendations), 3):
-            row = recommendations[row_start:row_start + 3]
+        for row_start in range(0, len(recommendations), 2):
+            row = recommendations[row_start:row_start + 2]
             cols = st.columns(len(row))
             for col_idx, (c, r) in enumerate(zip(cols, row)):
                 with c:
