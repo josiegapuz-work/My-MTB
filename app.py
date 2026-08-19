@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import streamlit as st
 import os
-from pathlib import Path
+from PIL import Image
 
 # Optional Google Sheets libs (required in requirements.txt)
 try:
@@ -395,3 +395,6 @@ st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 # """
 # )
 
+
+img_path = "/mount/src/my-mtb/images/pm_en_1-3-010_f.jpg"
+Image.open(img_path).verify()
