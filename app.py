@@ -247,15 +247,15 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
                     except Exception as ex:
                         st.write("(Image failed to load)", ex)
                     # with inner_cols[1]:
-                    st.write("**Move Type:**")
-                    show_types([r.get("move_type")] if r.get("move_type") else [])
+                    # st.write("**Move Type:**")
+                    # show_types([r.get("move_type")] if r.get("move_type") else [])
                     st.write("**Types:**")
                     show_types(r.get("types") or [])
                     # Stats: Attack, Speed, Score
-                    stats = st.columns(3)
+                    stats = st.columns(2)
                     stats[0].metric("Attack", r.get("attack", 0))
                     stats[1].metric("Speed", r.get("speed", 0))
-                    stats[2].metric("Score", r.get("score", 0))
+                    st.metric("Score", r.get("score", 0))
         st.markdown("---")
 
 # -------------------------
