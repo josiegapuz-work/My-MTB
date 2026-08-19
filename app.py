@@ -191,20 +191,10 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
 # -------------------------
 
 def enemy_card(enemy):
-    """Display one enemy as a styled card."""
+    # Outer container
     with st.container():
-        st.markdown(
-            """
-            <div style="
-                border: 2px solid #ddd;
-                border-radius: 10px;
-                padding: 10px;
-                margin-bottom: 15px;
-                background-color: #f9f9f9;
-                text-align: center;">
-            """,
-            unsafe_allow_html=True
-        )
+        # Create a bordered box effect using markdown
+        st.markdown("---")  # simple separator line
 
         # Name
         st.markdown(f"### {enemy.get('name')}")
@@ -220,14 +210,11 @@ def enemy_card(enemy):
         st.write("Types:")
         show_types(enemy.get("types") or [])
 
-        # Stats
-        st.write(
-            f"HP: {enemy.get('hp')} | "
-            f"Attack: {enemy.get('attack')} | "
-            f"Speed: {enemy.get('speed')}"
-        )
-
-        st.markdown("</div>", unsafe_allow_html=True)
+        # Stats in columns for nicer layout
+        stats_cols = st.columns(3)
+        stats_cols[0].metric("HP", enemy.get("hp"))
+        stats_cols[1].metric("Attack", enemy.get("attack"))
+        stats_cols[2].metric("Speed", enemy.get("speed"))
 
 
 # -------------------------
@@ -314,6 +301,7 @@ cols = st.columns(len(enemies) if enemies else 1)
 for c, e in zip(cols, enemies):
     with c:
         enemy_card(e)
+
 
 
 # st.subheader("Selected Enemies")
