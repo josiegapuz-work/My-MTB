@@ -1,15 +1,20 @@
 # app.py
 import json
-import random
 from pathlib import Path
 from typing import List, Dict, Any
-
 import streamlit as st
+
+# Optional Google Sheets libs
+try:
+    import gspread
+    from google.oauth2.service_account import Credentials
+except Exception:
+    gspread = None
+    Credentials = None
 
 # -------------------------
 # Type chart (full 18 types)
 # -------------------------
-# You can also keep this in a separate type_chart.json file if you prefer.
 type_chart = {
     "Normal": {"super_effective": [], "not_very_effective": ["Rock", "Steel"], "immune": ["Ghost"]},
     "Fighting": {"super_effective": ["Normal", "Rock", "Steel", "Ice", "Dark"], "not_very_effective": ["Flying", "Poison", "Bug", "Psychic", "Fairy"], "immune": ["Ghost"]},
@@ -32,28 +37,16 @@ type_chart = {
 }
 
 # -------------------------
-# Helper functions
+# Helpers: type and scoring
 # -------------------------
-def load_tags(path: str) -> List[Dict[str, Any]]:
-    p = Path(path)
-    if not p.exists():
-        st.error(f"Tags file not found: {path}")
-        return []
-    with open(p, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return data
-
 def normalize_type(t):
     return t.strip().title() if isinstance(t, str) and t.strip() != "" else None
 
 def get_move_type(tag: Dict[str, Any]) -> str:
-    # Prefer move_1_type if present, otherwise use first type of the Pokémon
     mt = tag.get("move_1_type") or (tag.get("types")[0] if tag.get("types") else None)
     return normalize_type(mt) or ""
 
 def type_multiplier(attacker_type: str, defender_types: List[str]) -> float:
-    # attacker_type: single type string
-    # defender_types: list of defender types
     if not attacker_type:
         return 1.0
     attacker_type = normalize_type(attacker_type)
@@ -74,24 +67,12 @@ def type_multiplier(attacker_type: str, defender_types: List[str]) -> float:
     return mult
 
 def compute_score(attacker: Dict[str, Any], defender: Dict[str, Any]) -> float:
-    """
-    Composite score that enforces priority:
-      1) Type effectiveness (dominant)
-      2) Attack stat
-      3) Speed stat
-    Implementation detail:
-      - type_score is multiplier (0, 0.5, 1, 2, 4 for dual super etc.)
-      - final numeric score = int(type_score * 100000) + attack * 100 + speed
-      This ensures type dominates ordering.
-    """
     defender_types = defender.get("types", []) or []
     move_type = get_move_type(attacker)
     t_mult = type_multiplier(move_type, defender_types)
-    # Normalize attack and speed to numeric safe values
-    attack_val = attacker.get("attack") or 0
-    speed_val = attacker.get("speed") or 0
-    # Compose final score
-    final = int(t_mult * 100000) + int(attack_val) * 100 + int(speed_val)
+    attack_val = int(attacker.get("attack") or 0)
+    speed_val = int(attacker.get("speed") or 0)
+    final = int(t_mult * 100000) + attack_val * 100 + speed_val
     return final
 
 def recommend_against_enemy(owned_tags: List[Dict[str, Any]], enemy: Dict[str, Any], top_n: int = 6) -> List[Dict[str, Any]]:
@@ -114,66 +95,122 @@ def recommend_against_enemy(owned_tags: List[Dict[str, Any]], enemy: Dict[str, A
     return results
 
 # -------------------------
+# Google Sheets helpers
+# -------------------------
+def get_gsheet_client_from_secrets():
+    """
+    Expects st.secrets["gcp_service_account"] to contain the service account JSON object.
+    """
+    if gspread is None or Credentials is None:
+        raise RuntimeError("gspread/google-auth not installed. Add to requirements.txt")
+    sa_info = st.secrets.get("gcp_service_account")
+    if not sa_info:
+        raise RuntimeError("Missing Streamlit secret: gcp_service_account")
+    creds = Credentials.from_service_account_info(sa_info, scopes=["https://www.googleapis.com/auth/spreadsheets"])
+    client = gspread.authorize(creds)
+    return client
+
+def load_owned_from_sheet(sheet_id: str) -> List[str]:
+    try:
+        client = get_gsheet_client_from_secrets()
+        sh = client.open_by_key(sheet_id)
+        ws = sh.sheet1
+        values = ws.col_values(1)
+        return [v.strip() for v in values if v.strip()]
+    except Exception as e:
+        st.error(f"Failed to load owned tags from Google Sheet: {e}")
+        return []
+
+def save_owned_to_sheet(sheet_id: str, owned_list: List[str]):
+    try:
+        client = get_gsheet_client_from_secrets()
+        sh = client.open_by_key(sheet_id)
+        ws = sh.sheet1
+        ws.clear()
+        if owned_list:
+            # write as column
+            ws.update('A1', [[v] for v in owned_list])
+        st.success("Saved owned tags to Google Sheet")
+    except Exception as e:
+        st.error(f"Failed to save owned tags to Google Sheet: {e}")
+
+# -------------------------
+# Load tags JSON (local file)
+# -------------------------
+DEFAULT_TAGS_FILE = "[02]stardust_v3_tags.json"
+def load_tags(path: str) -> List[Dict[str, Any]]:
+    p = Path(path)
+    if not p.exists():
+        st.error(f"Tags file not found: {path}")
+        return []
+    with p.open(encoding="utf-8") as f:
+        return json.load(f)
+
+# -------------------------
 # Streamlit UI
 # -------------------------
 st.set_page_config(page_title="Mezastar Team Builder", layout="wide")
 st.title("Pokemon Mezastar Team Builder")
 
 # Load tags
-default_path = "[02]stardust_v3_tags.json"
-tags = load_tags(default_path)
+tags = load_tags(DEFAULT_TAGS_FILE)
 if not tags:
     st.stop()
 
-# Sidebar controls
-st.sidebar.header("Data and Controls")
-st.sidebar.markdown("Upload your tags JSON to override the default file.")
-uploaded = st.sidebar.file_uploader("Upload [02]stardust_v3_tags.json", type=["json"])
-if uploaded:
-    try:
-        tags = json.load(uploaded)
-        st.sidebar.success("Uploaded tags loaded")
-    except Exception as e:
-        st.sidebar.error("Failed to load uploaded JSON")
-
-# Build lookup maps
-id_map = {t.get("pokemon_id"): t for t in tags}
+# Build maps
 name_map = {t.get("name"): t for t in tags}
+all_names = sorted(name_map.keys())
 
-# Owned tags selection
-st.sidebar.header("Your Owned Tags")
-all_names = [t.get("name") for t in tags]
-owned = st.sidebar.multiselect("Select tags you own (or upload file)", options=all_names, default=all_names[:12])
+# Sidebar: Google Sheets persistence controls
+st.sidebar.header("Persistence (Google Sheets)")
+sheet_id = st.sidebar.text_input("Owned tags Google Sheet ID", value=st.secrets.get("owned_sheet_id", ""))
+use_sheet = bool(sheet_id and st.secrets.get("gcp_service_account"))
 
-# Option to upload a simple list of owned IDs (optional)
-owned_file = st.sidebar.file_uploader("Upload owned IDs (one per line) optional", type=["txt", "csv"])
-if owned_file:
+if sheet_id and not st.secrets.get("gcp_service_account"):
+    st.sidebar.warning("Add your service account JSON to Streamlit secrets as gcp_service_account to enable Sheets persistence.")
+
+# Load owned defaults from sheet if available, otherwise from local default
+default_owned = all_names[:12]
+if use_sheet:
     try:
-        content = owned_file.read().decode("utf-8").splitlines()
-        # match by id or name
-        owned = []
-        for line in content:
-            s = line.strip()
-            if s in id_map:
-                owned.append(id_map[s].get("name"))
-            elif s in name_map:
-                owned.append(s)
-        st.sidebar.success("Owned list loaded")
+        sheet_owned = load_owned_from_sheet(sheet_id)
+        if sheet_owned:
+            # map ids to names if user stored ids; prefer names
+            resolved = []
+            for v in sheet_owned:
+                if v in name_map:
+                    resolved.append(v)
+                else:
+                    # try to match by pokemon_id
+                    match = next((t.get("name") for t in tags if t.get("pokemon_id") == v), None)
+                    if match:
+                        resolved.append(match)
+            if resolved:
+                default_owned = resolved
     except Exception:
-        st.sidebar.error("Could not parse owned file")
+        pass
 
-owned_tags = [name_map[n] for n in owned if n in name_map]
+# Owned tags selection UI
+st.sidebar.header("Your Owned Tags")
+owned = st.sidebar.multiselect("Select tags you own", options=all_names, default=default_owned)
+
+# Save to sheet button
+if use_sheet:
+    if st.sidebar.button("Save owned tags to Google Sheet"):
+        # Save names; you may prefer to save pokemon_id instead
+        save_owned_to_sheet(sheet_id, owned)
 
 # Enemy selection
 st.sidebar.header("Enemies to Battle")
 enemy_mode = st.sidebar.radio("Choose enemies", ["Random 3", "Pick manually"])
 if enemy_mode == "Random 3":
+    import random
     enemies = random.sample(tags, k=3) if len(tags) >= 3 else tags
 else:
-    enemy_choices = st.sidebar.multiselect("Pick up to 3 enemies", options=all_names, max_selections=3)
+    enemy_choices = st.sidebar.multiselect("Pick up to 3 enemies", options=all_names, max_selections=3, default=all_names[:3])
     enemies = [name_map[n] for n in enemy_choices if n in name_map]
 
-# Main UI
+# Main UI: show enemies
 st.subheader("Selected Enemies")
 cols = st.columns(len(enemies) if enemies else 1)
 for c, e in zip(cols, enemies):
@@ -182,11 +219,13 @@ for c, e in zip(cols, enemies):
         st.write(f"Types: {', '.join(e.get('types') or [])}")
         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
 
-if not owned_tags:
+if not owned:
     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
     st.stop()
 
-# Compute recommendations
+owned_tags = [name_map[n] for n in owned if n in name_map]
+
+# Compute and display recommendations
 st.subheader("Recommendations from Your Owned Tags")
 for enemy in enemies:
     st.markdown(f"### Against {enemy.get('name')}")
@@ -194,7 +233,6 @@ for enemy in enemies:
     if not recs:
         st.write("No recommendations available.")
         continue
-    # Display table
     rows = []
     for r in recs:
         rows.append({
@@ -208,17 +246,18 @@ for enemy in enemies:
     st.table(rows)
 
 st.markdown("---")
-st.info("How scoring works: Type effectiveness dominates (super effective > normal > not very > immune). Within the same type effectiveness, higher attack then higher speed are preferred.")
+st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 
-# Footer with run instructions
-st.markdown("#### Run instructions")
+# Footer: instructions for Streamlit Cloud
+st.markdown("#### Deploying to Streamlit Community Cloud")
 st.markdown(
     """
-1. Install Streamlit: `pip install streamlit`  
-2. Place `app.py` and `[02]stardust_v3_tags.json` in the same folder.  
-3. Run: `streamlit run app.py`  
-4. On your iPhone, open `http://<your-computer-ip>:8501` (use your computer's local IP).  
-   - Make sure your computer and iPhone are on the same Wi‑Fi network.  
-   - If you need to allow firewall access, permit Python/Streamlit to accept connections.
+1. Push this repo to GitHub (include app.py, [02]stardust_v3_tags.json, requirements.txt).  
+2. On Streamlit Cloud, create a new app from the repo.  
+3. In the app settings, add two secrets:  
+   - gcp_service_account (paste the service account JSON object)  
+   - owned_sheet_id (the Google Sheet ID)  
+4. In the app UI sidebar, paste the Sheet ID (or set it in secrets as owned_sheet_id).  
+5. Run the app. The app will read/write your owned tags to the sheet.
 """
 )
