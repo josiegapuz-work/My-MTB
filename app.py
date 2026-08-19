@@ -287,36 +287,56 @@ def enemy_card(enemy):
         st.markdown("---")  # separator
 
 
-def team_card(recommendations):
+def team_card(recommendations: list[dict]):
+    """Render recommended team cards in rows of 3.
+    Each card is a two-column layout: Image+Name | Move Type, Types, Attack, Speed, Score.
+    """
+    if not recommendations:
+        st.write("No recommendations available.")
+        return
+
     st.markdown("**Recommended Team Against This Enemy:**")
-    with st.container():
-        st.markdown("---")  # separator
-        st.markdown(f"### \#1: {recommendations.get('name')}")
 
-        inner_cols = st.columns([1,2])
-        with inner_cols[0]:
-        # Image
-            img_path = get_tag_image_path(r["pokemon_id"])
-            try:
-                image = Image.open(img_path)
-                st.image(image, use_container_width=True)
-                st.write(f"**{r['name']}**")
-            except Exception as ex:
-                st.write("(Image failed to load)", ex)
-        with inner_cols[1]:
-            st.write("Move Type:")
-            show_types(recommendations.get("move_type") or [])
-            # Types
-            st.write("Types:")
-            show_types(recommendations.get("types") or [])
+    # Process in rows of 3
+    for row_start in range(0, len(recommendations), 3):
+        row = recommendations[row_start:row_start + 3]
+        cols = st.columns(len(row))
+        for col_idx, (c, r) in enumerate(zip(cols, row)):
+            card_index = row_start + col_idx + 1  # 1-based index for labeling
+            with c:
+                with st.container():
+                    st.markdown("---")  # separator for each card
 
-            # Stats in columns
-            stats_cols = st.columns(3)
-            stats_cols[0].metric("HP", enemy.get("hp"))
-            stats_cols[1].metric("Attack", enemy.get("attack"))
-            stats_cols[2].metric("Speed", enemy.get("speed"))
+                    # Header with index and name
+                    st.markdown(f"### #{card_index}: {r.get('name')}")
 
-        st.markdown("---")  # separator
+                    # Two-column inner layout: image | stats
+                    inner_cols = st.columns([1, 2])
+                    with inner_cols[0]:
+                        img_path = get_tag_image_path(r.get("pokemon_id"))
+                        try:
+                            image = Image.open(img_path)
+                            st.image(image, use_container_width=True)
+                        except Exception as ex:
+                            st.write("(Image failed to load)", ex)
+                        # Name repeated under image (optional)
+                        st.write(f"**{r.get('name')}**")
+
+                    with inner_cols[1]:
+                        st.write("**Move Type:**")
+                        # show_types expects a list of type names
+                        show_types([r.get("move_type")] if r.get("move_type") else [])
+
+                        st.write("**Types:**")
+                        show_types(r.get("types") or [])
+
+                        # Stats in three small metrics (use values from recommendation)
+                        stats_cols = st.columns(3)
+                        stats_cols[0].metric("Attack", r.get("attack", 0))
+                        stats_cols[1].metric("Speed", r.get("speed", 0))
+                        stats_cols[2].metric("Score", r.get("score", 0))
+
+                    st.markdown("---")
 
 
 
