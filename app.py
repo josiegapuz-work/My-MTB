@@ -168,10 +168,9 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
 # Aesthetics helpers
 # -------------------------
 def show_types(types: List[str]):
-    """Display type icons with names side by side."""
+    """Display type icons with names side by side. Responsive on mobile."""
     if not types:
         return
-    # On narrow screens, Streamlit will stack columns; this keeps it responsive.
     cols = st.columns(len(types), vertical_alignment="center")
     for c, t in zip(cols, types):
         img_path = Path(__file__).parent / "types_img" / f"{t}.png"
@@ -188,78 +187,76 @@ def get_tag_image_path(pokemon_id: str) -> Path:
     return Path(__file__).parent / "images" / f"pm_en_{pokemon_id}_f.jpg"
 
 # -------------------------
-# Card renderers
+# Combined card renderer
 # -------------------------
-def enemy_card(enemy: Dict[str, Any]):
-    """Render an enemy card with image, types, and metrics."""
+def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, Any]]):
+    """
+    Single merged card: everything about the enemy, then underneath the recommended team.
+    Designed to be placed inside a column; three such cards can be shown side-by-side.
+    """
     with st.container():
         st.markdown("---")
-        st.markdown(f"### {enemy.get('name')}")
+        # Enemy header
+        st.markdown(f"## {enemy.get('name')}")
+        # Enemy image
         img_path = get_tag_image_path(enemy.get("pokemon_id"))
         try:
             if img_path.exists():
                 image = Image.open(img_path)
-                st.image(image, use_container_width=True)
+                st.image(image, use_column_width=True)
             else:
-                st.write("(Image not found)")
+                st.write("(Enemy image not found)")
         except Exception as ex:
-            st.write("(Image failed to load)", ex)
+            st.write("(Enemy image failed to load)", ex)
 
-        st.write("Types:")
+        # Enemy types and stats
+        st.write("**Types:**")
         show_types(enemy.get("types") or [])
 
         stats_cols = st.columns(3)
         stats_cols[0].metric("HP", enemy.get("hp"))
         stats_cols[1].metric("Attack", enemy.get("attack"))
         stats_cols[2].metric("Speed", enemy.get("speed"))
+
+        st.markdown("----")
+        st.markdown("**Recommended Team**")
+
+        if not recommendations:
+            st.write("No recommendations available.")
+            st.markdown("---")
+            return
+
+        # Render up to 6 recommendations in rows of 3 (responsive)
+        for row_start in range(0, len(recommendations), 3):
+            row = recommendations[row_start:row_start + 3]
+            cols = st.columns(len(row))
+            for col_idx, (c, r) in enumerate(zip(cols, row)):
+                with c:
+                    # compact team card inside the merged card
+                    st.markdown("###")
+                    st.markdown(f"**{r.get('name')}**")
+                    inner_cols = st.columns([1, 2])
+                    with inner_cols[0]:
+                        img_path = get_tag_image_path(r.get("pokemon_id"))
+                        try:
+                            if img_path.exists():
+                                image = Image.open(img_path)
+                                st.image(image, use_column_width=True)
+                            else:
+                                st.write("(Image not found)")
+                        except Exception as ex:
+                            st.write("(Image failed to load)", ex)
+                    with inner_cols[1]:
+                        st.write("**Move Type:**")
+                        show_types([r.get("move_type")] if r.get("move_type") else [])
+                        st.write("**Types:**")
+                        show_types(r.get("types") or [])
+                        # Stats: Attack, Speed, Score
+                        stats = st.columns(3)
+                        stats[0].metric("Attack", r.get("attack", 0))
+                        stats[1].metric("Speed", r.get("speed", 0))
+                        stats[2].metric("Score", r.get("score", 0))
         st.markdown("---")
-
-def team_card(recommendations: List[Dict[str, Any]]):
-    """
-    Render recommended team cards in rows of 3.
-    Each card is a two-column layout: Image+Name | Move Type, Types, Attack, Speed, Score.
-    Designed to be responsive for mobile and desktop.
-    """
-    if not recommendations:
-        st.write("No recommendations available.")
-        return
-
-    st.markdown("**Recommended Team Against This Enemy:**")
-
-    # Render in rows of up to 3 cards per row
-    for row_start in range(0, len(recommendations), 3):
-        row = recommendations[row_start:row_start + 3]
-        cols = st.columns(len(row))
-        for col_idx, (c, r) in enumerate(zip(cols, row)):
-            card_index = row_start + col_idx + 1
-            with c:
-                # Card container
-                st.markdown("----")
-                st.markdown(f"#### #{card_index}: {r.get('name')}")
-                inner_cols = st.columns([1, 2])
-                with inner_cols[0]:
-                    img_path = get_tag_image_path(r.get("pokemon_id"))
-                    try:
-                        if img_path.exists():
-                            image = Image.open(img_path)
-                            # use_container_width True keeps it responsive on mobile
-                            st.image(image, use_container_width=True)
-                        else:
-                            st.write("(Image not found)")
-                    except Exception as ex:
-                        st.write("(Image failed to load)", ex)
-                    st.write(f"**{r.get('name')}**")
-                with inner_cols[1]:
-                    st.write("**Move Type:**")
-                    show_types([r.get("move_type")] if r.get("move_type") else [])
-                    st.write("**Types:**")
-                    show_types(r.get("types") or [])
-                    # Stats: Attack, Speed, Score
-                    stats_cols = st.columns(3)
-                    stats_cols[0].metric("Attack", r.get("attack", 0))
-                    stats_cols[1].metric("Speed", r.get("speed", 0))
-                    stats_cols[2].metric("Score", r.get("score", 0))
-                st.markdown("----")
 
 # -------------------------
 # Streamlit UI
@@ -336,46 +333,23 @@ else:
     enemy_choices = st.sidebar.multiselect("Pick up to 3 enemies", options=all_names, max_selections=3, default=all_names[:3])
     enemies = [name_map[n] for n in enemy_choices if n in name_map]
 
-# ========= Main UI: show enemies ========= #
-st.subheader("Selected Enemies")
+# ========= Main UI: show merged cards ========= #
+st.subheader("Selected Enemies and Recommended Teams")
 
-# Top row: show selected enemies side-by-side (responsive)
-if enemies:
-    top_cols = st.columns(len(enemies))
-    for c, e in zip(top_cols, enemies):
-        with c:
-            # compact enemy preview (small)
-            try:
-                img_path = get_tag_image_path(e.get("pokemon_id"))
-                if img_path.exists():
-                    image = Image.open(img_path)
-                    st.image(image, use_container_width=True)
-                else:
-                    st.write("(No image)")
-            except Exception:
-                st.write("(Image failed to load)")
-            st.markdown(f"**{e.get('name')}**")
-else:
-    st.write("No enemies selected.")
-
-# Ensure owned tags exist
 if not owned:
     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
     st.stop()
 
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
-# For each enemy: the 6 recommended team cards underneath
-for enemy in enemies:
-    # st.markdown(f"***Recommendations against {enemy.get('name')}***")
-    enemy_card(enemy)
-
-    recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
-    if not recs:
-        st.write("No recommendations available.")
-        continue
-
-    team_card(recs)
+# Render merged cards in rows of 3 (responsive)
+for row_start in range(0, len(enemies), 3):
+    row = enemies[row_start:row_start + 3]
+    cols = st.columns(len(row))
+    for c, enemy in zip(cols, row):
+        with c:
+            recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
+            enemy_with_team_card(enemy, recs)
 
 st.markdown("---")
 st.info("Type effectiveness dominates the ranking, then attack, then speed.")
