@@ -269,6 +269,27 @@ if not owned:
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
 # Compute and display recommendations
+# st.subheader("Recommendations from Your Owned Tags")
+# for enemy in enemies:
+#     st.markdown(f"### Against {enemy.get('name')}")
+#     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
+#     if not recs:
+#         st.write("No recommendations available.")
+#         continue
+#     rows = []
+#     for r in recs:
+#         img_path = get_tag_image_path(r["pokemon_id"])
+
+#         rows.append({
+#             "Name": r["name"],
+#             "Move Type": r["move_type"],
+#             "Types": ", ".join(r["types"] or []),
+#             "Attack": r["attack"],
+#             "Speed": r["speed"],
+#             "Score": r["score"]
+#         })
+#     st.table(rows)
+
 st.subheader("Recommendations from Your Owned Tags")
 for enemy in enemies:
     st.markdown(f"### Against {enemy.get('name')}")
@@ -276,23 +297,21 @@ for enemy in enemies:
     if not recs:
         st.write("No recommendations available.")
         continue
-    rows = []
+
     for r in recs:
         img_path = get_tag_image_path(r["pokemon_id"])
-
-        rows.append({
-            "Name": r["name"]
+        cols = st.columns([1, 3])  # image column + stats column
+        with cols[0]:
             try:
                 st.image(img_path, caption=r["name"], width=120)
             except Exception:
-                st.write("(No image)"),
-            "Move Type": r["move_type"],
-            "Types": ", ".join(r["types"] or []),
-            "Attack": r["attack"],
-            "Speed": r["speed"],
-            "Score": r["score"]
-        })
-    st.table(rows)
+                st.write("(No image)")
+        with cols[1]:
+            st.write(f"**{r['name']}**")
+            st.write(f"Move Type: {r['move_type']}")
+            st.write(f"Types: {', '.join(r['types'] or [])}")
+            st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
+
 
 # for r in recs:
 #     img_path = get_tag_image_path(r["pokemon_id"])
