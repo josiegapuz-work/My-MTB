@@ -108,7 +108,7 @@ def show_types(types: list[str]):
         img_path = f"types_img/{t}.png"
         with c:
             try:
-                st.image(img_path, width=40)
+                st.image(img_path, width=80)
             except Exception:
                 st.write("(No icon)")
             st.caption(t)
@@ -184,8 +184,6 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
         return []
     with p.open(encoding="utf-8") as f:
         return json.load(f)
-
-
 
 
 
@@ -274,7 +272,7 @@ for c, e in zip(cols, enemies):
         st.markdown(f"**{e.get('name')}**")
         img_path = get_tag_image_path(e.get("pokemon_id"))
         try:
-            st.image(img_path, caption=e.get("name"), width=200)
+            st.image(img_path, caption=e.get("name")) #, width=200)
         except Exception:
             st.write("(No image found)")
 
