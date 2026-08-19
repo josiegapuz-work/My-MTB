@@ -185,6 +185,47 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
     with p.open(encoding="utf-8") as f:
         return json.load(f)
 
+# Aesthetics
+
+def enemy_card(enemy):
+    # Outer container with a border and padding
+    with st.container():
+        st.markdown(
+            """
+            <div style="
+                border: 2px solid #ddd;
+                border-radius: 10px;
+                padding: 10px;
+                margin-bottom: 15px;
+                background-color: #f9f9f9;
+                text-align: center;">
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Name
+        st.markdown(f"### {enemy.get('name')}")
+
+        # Image
+        img_path = get_tag_image_path(enemy.get("pokemon_id"))
+        try:
+            st.image(img_path, use_column_width=True)
+        except Exception:
+            st.write("(No image found)")
+
+        # Types
+        st.write("Types:")
+        show_types(enemy.get("types") or [])
+
+        # Stats
+        st.write(
+            f"HP: {enemy.get('hp')} | "
+            f"Attack: {enemy.get('attack')} | "
+            f"Speed: {enemy.get('speed')}"
+        )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 # -------------------------
@@ -265,21 +306,29 @@ else:
 
 #========= Main UI: show enemies =========#
 
+# --- Usage ---
 st.subheader("Selected Enemies")
 cols = st.columns(len(enemies) if enemies else 1)
 for c, e in zip(cols, enemies):
     with c:
-        st.markdown(f"**{e.get('name')}**")
-        img_path = get_tag_image_path(e.get("pokemon_id"))
-        try:
-            st.image(img_path, caption=e.get("name")) #, width=200)
-        except Exception:
-            st.write("(No image found)")
+        enemy_card(e)
 
-        st.write("Types:")
-        show_types(e.get("types") or [])
 
-        st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
+# st.subheader("Selected Enemies")
+# cols = st.columns(len(enemies) if enemies else 1)
+# for c, e in zip(cols, enemies):
+#     with c:
+#         st.markdown(f"**{e.get('name')}**")
+#         img_path = get_tag_image_path(e.get("pokemon_id"))
+#         try:
+#             st.image(img_path, caption=e.get("name")) #, width=200)
+#         except Exception:
+#             st.write("(No image found)")
+
+#         st.write("Types:")
+#         show_types(e.get("types") or [])
+
+#         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
 
 
 if not owned:
