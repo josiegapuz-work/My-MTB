@@ -265,20 +265,7 @@ else:
     enemy_choices = st.sidebar.multiselect("Pick up to 3 enemies", options=all_names, max_selections=3, default=all_names[:3])
     enemies = [name_map[n] for n in enemy_choices if n in name_map]
 
-# Main UI: show enemies
-# st.subheader("Selected Enemies")
-# cols = st.columns(len(enemies) if enemies else 1)
-# for c, e in zip(cols, enemies):
-#     with c:
-#         st.markdown(f"**{e.get('name')}**")
-#         img_path = get_tag_image_path(e.get("pokemon_id"))
-#         try:
-#             st.image(img_path, caption=e.get("name"), width=200)
-#         except Exception:
-#             st.write("(No image found)")
-#         st.write("Types:")
-#         show_types(e.get("types") or [])
-#         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
+#========= Main UI: show enemies =========#
 
 st.subheader("Selected Enemies")
 cols = st.columns(len(enemies) if enemies else 1)
@@ -291,8 +278,8 @@ for c, e in zip(cols, enemies):
         except Exception:
             st.write("(No image found)")
 
-        st.write("Types:")
-        show_types(e.get("types") or [])
+        st.write("Types:" + show_types(e.get("types") or []))
+        # show_types(e.get("types") or [])
 
         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
 
@@ -303,28 +290,7 @@ if not owned:
 
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
-#Compute and display recommendations
-# st.subheader("Recommendations from Your Owned Tags")
-# for enemy in enemies:
-#     st.markdown(f"### Against {enemy.get('name')}")
-#     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
-#     if not recs:
-#         st.write("No recommendations available.")
-#         continue
-#     rows = []
-#     for r in recs:
-#         img_path = get_tag_image_path(r["pokemon_id"])
-
-#         rows.append({
-#             "Name": r["name"],
-#             "Move Type": r["move_type"],
-#             "Types": ", ".join(r["types"] or []),
-#             "Attack": r["attack"],
-#             "Speed": r["speed"],
-#             "Score": r["score"]
-#         })
-#     st.table(rows)
-
+#========= Compute and display recommendations =========#
 st.subheader("Recommendations from Your Owned Tags")
 for enemy in enemies:
     st.markdown(f"### Against {enemy.get('name')}")
@@ -349,68 +315,9 @@ for enemy in enemies:
             show_types(r["types"] or [])
             st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
 
-# st.subheader("Recommendations from Your Owned Tags")
-# for enemy in enemies:
-#     st.markdown(f"### Against {enemy.get('name')}")
-#     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
-#     if not recs:
-#         st.write("No recommendations available.")
-#         continue
-
-#     for r in recs:
-#         img_path = get_tag_image_path(r["pokemon_id"])
-#         cols = st.columns([1, 3])  # image column + stats column
-#         with cols[0]:
-#             try:
-#                 st.image(img_path, caption=r["name"], width=120)
-#             except Exception:
-#                 st.write("(No image)")
-#         with cols[1]:
-#             st.write(f"**{r['name']}**")
-#             st.write(f"Move Type: {r['move_type']}")
-#             st.write(f"Types: {', '.join(r['types'] or [])}")
-#             st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
-
-
-# for r in recs:
-#     img_path = get_tag_image_path(r["pokemon_id"])
-#     cols = st.columns([1, 3])
-#     with cols[0]:
-#         try:
-#             st.image(img_path, caption=r["name"], width=120)
-#         except Exception:
-#             st.write("(No image)")
-#     with cols[1]:
-#         st.write(f"**{r['name']}**")
-#         st.write(f"Move Type: {r['move_type']}")
-#         st.write(f"Types: {r['types']}")
-#         st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
 
 st.markdown("---")
 st.info("Type effectiveness dominates the ranking, then attack, then speed.")
-
-# for enemy in enemies:
-#     st.markdown(f"### {enemy.get('name')}")
-#     img_path = get_tag_image_path(enemy.get("pokemon_id"))
-#     try:
-#         st.image(img_path, caption=enemy.get("name"), width=200)
-#     except Exception:
-#         st.write("(No image found)")
-#     st.write(f"Types: {', '.join(enemy.get('types') or [])}")
-
-# for r in recs:
-#     img_path = get_tag_image_path(r["pokemon_id"])
-#     cols = st.columns([1, 3])
-#     with cols[0]:
-#         try:
-#             st.image(img_path, caption=r["name"], width=120)
-#         except Exception:
-#             st.write("(No image)")
-#     with cols[1]:
-#         st.write(f"**{r['name']}**")
-#         st.write(f"Move Type: {r['move_type']}")
-#         st.write(f"Types: {r['types']}")
-#         st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
 
 
 # # Footer: quick deploy notes
