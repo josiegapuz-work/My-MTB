@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any
 import streamlit as st
+import os
 
 # Optional Google Sheets libs (required in requirements.txt)
 try:
@@ -94,28 +95,9 @@ def recommend_against_enemy(owned_tags: List[Dict[str, Any]], enemy: Dict[str, A
         })
     return results
 
-# def get_tag_image_path(pokemon_id: str) -> str:
-#     # Adjust folder name if different
-#     return f"images/pm_en_{pokemon_id}_f.jpg"
 
-def get_tag_image_path(pokemon_id: str) -> str:
-    # Always resolve relative to app.py location
-    base_dir = os.path.dirname(__file__)
-    return os.path.join(base_dir, "images", f"pm_en_{pokemon_id}_f.png")
 
-def show_types(types: list[str]):
-    """Display type icons with names side by side."""
-    if not types:
-        return
-    cols = st.columns(len(types))
-    for c, t in zip(cols, types):
-        img_path = f"types_img/{t}.png"
-        with c:
-            try:
-                st.image(img_path, width=50)
-            except Exception:
-                st.write("(No icon)")
-            st.caption(t)
+
 
 
 # -------------------------
@@ -193,7 +175,27 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
 # -------------------------
 # Aesthetics
 # -------------------------
-import os
+def get_tag_image_path(pokemon_id: str) -> str:
+    # Adjust folder name if different
+    # return f"images/pm_en_{pokemon_id}_f.jpg"
+    return os.path.join("images", f"pm_en_{pokemon_id}_f.png")
+
+
+
+def show_types(types: list[str]):
+    """Display type icons with names side by side."""
+    if not types:
+        return
+    cols = st.columns(len(types))
+    for c, t in zip(cols, types):
+        img_path = f"types_img/{t}.png"
+        with c:
+            try:
+                st.image(img_path, width=50)
+            except Exception:
+                st.write("(No icon)")
+            st.caption(t)
+            
 def enemy_card(enemy):
     # Outer container
     with st.container():
