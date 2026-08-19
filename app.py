@@ -185,10 +185,13 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
     with p.open(encoding="utf-8") as f:
         return json.load(f)
 
+
+# -------------------------
 # Aesthetics
+# -------------------------
 
 def enemy_card(enemy):
-    # Outer container with a border and padding
+    """Display one enemy as a styled card."""
     with st.container():
         st.markdown(
             """
@@ -225,7 +228,6 @@ def enemy_card(enemy):
         )
 
         st.markdown("</div>", unsafe_allow_html=True)
-
 
 
 # -------------------------
