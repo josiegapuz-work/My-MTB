@@ -249,7 +249,7 @@ def enemy_card(enemy):
     img_path = get_tag_image_path(enemy.get("pokemon_id"))
     try:
         image = Image.open(img_path)
-        st.image(image, use_column_width=True, caption=enemy.get("name"))
+        st.image(image, use_container_width=True, caption=enemy.get("name"))
     except Exception as ex:
         st.write("(Image failed to load)", ex)
 
