@@ -211,26 +211,15 @@ def enemy_card(enemy):
         st.markdown(f"### {enemy.get('name')}")
 
         # Image
-        # img_path = get_tag_image_path(enemy.get("pokemon_id"))
-        # st.write("Looking for:", img_path)
-        
-        # img_path = get_tag_image_path(enemy.get("pokemon_id"))
-        # st.write("Looking for:", img_path)
-        # st.write("Exists?", os.path.exists(img_path))
-        # try:
-        #     st.image(img_path, use_column_width=True)
-        # except Exception:
-        #     st.write("(No image found)")
 
         img_path = get_tag_image_path(enemy.get("pokemon_id"))
-        st.write("Looking for:", img_path)
-        st.write("Exists?", os.path.exists(img_path))
+        # st.write("Looking for:", img_path)
+        # st.write("Exists?", os.path.exists(img_path))
         try:
             image = Image.open(img_path)
-            st.image(image, use_container_width=True, caption=enemy.get("name"))
+            st.image(image, use_container_width=True)
         except Exception as ex:
             st.write("(Image failed to load)", ex)
-
 
         # Types
         st.write("Types:")
@@ -241,6 +230,7 @@ def enemy_card(enemy):
         stats_cols[0].metric("HP", enemy.get("hp"))
         stats_cols[1].metric("Attack", enemy.get("attack"))
         stats_cols[2].metric("Speed", enemy.get("speed"))
+        st.markdown("---")  # simple separator line
 
 
 # -------------------------
