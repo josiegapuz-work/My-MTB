@@ -233,26 +233,32 @@ def enemy_card(enemy):
         st.markdown("---")  # simple separator line
 
 
-def team_card(recom):
+def team_card(recommendations):
     st.markdown("**Recommended Team Against This Enemy:**")
-    for r in recom:
-        with st.container():
-            cols = st.columns([1, 2])  # left: image+name, right: stats
-            with cols[0]:
-                img_path = get_tag_image_path(r["pokemon_id"])
-                try:
-                    st.image(img_path, width=120)
-                except Exception:
-                    st.write("(No image)")
-                st.write(f"**{r['name']}**")
-            with cols[1]:
-                st.write(f"**Move Type:**")
-                show_types([r["move_type"]])
-                st.write(f"**Types:**")
-                show_types(r["types"] or [])
-                st.write(f"Attack: {r['attack']}")
-                st.write(f"Speed: {r['speed']}")
-                st.write(f"Score: {r['score']}")
+
+    # Arrange recommendations in rows of 3
+    for i in range(0, len(recommendations), 3):
+        row = recommendations[i:i+3]
+        cols = st.columns(len(row))
+        for c, r in zip(cols, row):
+            with c:
+                with st.container():
+                    inner_cols = st.columns([1, 2])  # left: image+name, right: stats
+                    with inner_cols[0]:
+                        img_path = get_tag_image_path(r["pokemon_id"])
+                        try:
+                            st.image(img_path, width=120)
+                        except Exception:
+                            st.write("(No image)")
+                        st.write(f"**{r['name']}**")
+                    with inner_cols[1]:
+                        st.write(f"**Move Type:**")
+                        show_types([r["move_type"]])
+                        st.write(f"**Types:**")
+                        show_types(r["types"] or [])
+                        st.write(f"Attack: {r['attack']}")
+                        st.write(f"Speed: {r['speed']}")
+                        st.write(f"Score: {r['score']}")
 # -------------------------
 # Streamlit UI
 # -------------------------
@@ -344,7 +350,7 @@ if not owned:
 
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
-st.subheader("Recommendations from Your Owned Tags")
+st.subheader("Selected Enemies")
 for enemy in enemies:
     # enemy_card(enemy)  # show enemy card
 
@@ -353,7 +359,8 @@ for enemy in enemies:
         st.write("No recommendations available.")
         continue
 
-    team_card(recs)  # show team card separately
+    team_card(recs)  # show team cards in rows of 3
+
 
 #========= Compute and display recommendations =========#
 # st.subheader("Recommendations from Your Owned Tags")
