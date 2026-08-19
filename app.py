@@ -291,7 +291,7 @@ def team_card(recommendations):
     st.markdown("**Recommended Team Against This Enemy:**")
 
     # Arrange recommendations in rows of 3
-    for i in range(0, len(recommendations), 3):
+    for i in range(0, len(recommendations)):
         row = recommendations[i:i+3]
         cols = st.columns(len(row))
         for c, r in zip(cols, row):
