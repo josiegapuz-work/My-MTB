@@ -219,7 +219,7 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
         stats_cols[2].metric("Speed", enemy.get("speed"))
 
         st.markdown("----")
-        st.markdown("**Recommended Team**")
+        st.markdown("**Recommended Pokemon**")
 
         if not recommendations:
             st.write("No recommendations available.")
@@ -334,7 +334,7 @@ else:
     enemies = [name_map[n] for n in enemy_choices if n in name_map]
 
 # ========= Main UI: show merged cards ========= #
-st.subheader("Selected Enemies and Recommended Teams")
+st.subheader("Selected Enemies and Recommended Pokemon")
 
 if not owned:
     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
@@ -348,7 +348,7 @@ for row_start in range(0, len(enemies), 3):
     cols = st.columns(len(row))
     for c, enemy in zip(cols, row):
         with c:
-            recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
+            recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
             enemy_with_team_card(enemy, recs)
 
 st.markdown("---")
