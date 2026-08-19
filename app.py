@@ -180,7 +180,7 @@ def show_types(types: list[str]):
     """Display type icons with names side by side."""
     if not types:
         return
-    cols = st.columns(len(types))
+    cols = st.columns(len(types), vertical_alignment="center")
     for c, t in zip(cols, types):
         img_path = f"types_img/{t}.png"
         with c:
@@ -317,25 +317,6 @@ cols = st.columns(len(enemies) if enemies else 1)
 for c, e in zip(cols, enemies):
     with c:
         enemy_card(e)
-
-
-
-# st.subheader("Selected Enemies")
-# cols = st.columns(len(enemies) if enemies else 1)
-# for c, e in zip(cols, enemies):
-#     with c:
-#         st.markdown(f"**{e.get('name')}**")
-#         img_path = get_tag_image_path(e.get("pokemon_id"))
-#         try:
-#             st.image(img_path, caption=e.get("name")) #, width=200)
-#         except Exception:
-#             st.write("(No image found)")
-
-#         st.write("Types:")
-#         show_types(e.get("types") or [])
-
-#         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
-
 
 if not owned:
     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
