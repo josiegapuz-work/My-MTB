@@ -108,7 +108,7 @@ def show_types(types: list[str]):
         img_path = f"types_img/{t}.png"
         with c:
             try:
-                st.image(img_path, width=80)
+                st.image(img_path, width=50)
             except Exception:
                 st.write("(No icon)")
             st.caption(t)
@@ -366,3 +366,5 @@ st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 # - If you prefer the sheet to store pokemon_id instead of names, change the save/load functions accordingly.
 # """
 # )
+
+st.write("Looking for:", img_path)
