@@ -202,6 +202,7 @@ def enemy_card(enemy):
         # Image
         img_path = get_tag_image_path(enemy.get("pokemon_id"))
         st.write("Looking for:", img_path)
+        st.image(img_path, use_column_width=True)
 
         try:
             st.image(img_path, use_column_width=True)
