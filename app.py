@@ -291,7 +291,7 @@ def team_card(recommendations):
     st.markdown("**Recommended Team Against This Enemy:**")
 
     # Arrange recommendations in rows of 3
-    for i in range(0, len(recommendations), 1):
+    for i in range(0, len(recommendations), 3):
         row = recommendations[i:i+3]
         cols = st.columns(len(row))
         for c, r in zip(cols, row):
@@ -396,15 +396,15 @@ else:
 #========= Main UI: show enemies =========#
 
 # --- Usage ---
-# st.subheader("Selected Enemies")
-# cols = st.columns(len(enemies) if enemies else 1)
-# for c, e in zip(cols, enemies):
-#     with c:
-#         enemy_card(e)
+st.subheader("Selected Enemies")
+cols = st.columns(len(enemies) if enemies else 1)
+for c, e in zip(cols, enemies):
+    with c:
+        enemy_card(e)
 
-# if not owned:
-#     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
-#     st.stop()
+if not owned:
+    st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
+    st.stop()
 
 # owned_tags = [name_map[n] for n in owned if n in name_map]
 
@@ -446,11 +446,11 @@ else:
 #             st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
 
 
-st.subheader("Selected Enemies")
+# st.subheader("Selected Enemies")
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
 for enemy in enemies:
-    enemy_card(enemy)  # show enemy card
+    # enemy_card(enemy)  # show enemy card
 
     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
     if not recs:
