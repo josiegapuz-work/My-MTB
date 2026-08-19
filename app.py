@@ -201,6 +201,8 @@ def enemy_card(enemy):
 
         # Image
         img_path = get_tag_image_path(enemy.get("pokemon_id"))
+        st.write("Looking for:", img_path)
+
         try:
             st.image(img_path, use_column_width=True)
         except Exception:
@@ -367,4 +369,3 @@ st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 # """
 # )
 
-st.write("Looking for:", img_path)
