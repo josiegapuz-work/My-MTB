@@ -176,19 +176,6 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
 # -------------------------
 # Aesthetics
 # -------------------------
-# def get_tag_image_path(pokemon_id: str) -> str:
-#     # Adjust folder name if different
-#     base_dir = os.path.dirname(__file__)  # folder where app.py lives
-#     return os.path.join(base_dir, "images", f"pm_en_{pokemon_id}_f.jpg")
-#     # return f"images/pm_en_{pokemon_id}_f.jpg"
-
-def get_tag_image_path(pokemon_id: str) -> str:
-    # Resolve path relative to app.py
-    base_dir = Path(__file__).parent
-    return str(base_dir / "images" / f"pm_en_{pokemon_id}_f.jpg")
-
-
-
 def show_types(types: list[str]):
     """Display type icons with names side by side."""
     if not types:
@@ -203,6 +190,16 @@ def show_types(types: list[str]):
                 st.write("(No icon)")
             st.caption(t)
 
+# def get_tag_image_path(pokemon_id: str) -> str:
+#     # Adjust folder name if different
+#     base_dir = os.path.dirname(__file__)  # folder where app.py lives
+#     return os.path.join(base_dir, "images", f"pm_en_{pokemon_id}_f.jpg")
+#     # return f"images/pm_en_{pokemon_id}_f.jpg"
+
+# def get_tag_image_path(pokemon_id: str) -> str:
+#     # Resolve path relative to app.py
+#     base_dir = Path(__file__).parent
+#     return str(base_dir / "images" / f"pm_en_{pokemon_id}_f.jpg")
 
 # for c, e in zip(cols, enemies):
 #     with c:
@@ -212,37 +209,49 @@ def show_types(types: list[str]):
 #             st.image(img_path, caption=e.get("name")) #, width=200)
 #         except Exception:
 #             st.write("(No image found)")
-def enemy_card(enemy):
+# def enemy_card(enemy):
     # Outer container
-    with st.container():
-        # Create a bordered box effect using markdown
-        st.markdown("---")  # simple separator line
+    # with st.container():
+    #     # Create a bordered box effect using markdown
+    #     st.markdown("---")  # simple separator line
 
-        # Name
-        st.markdown(f"### {enemy.get('name')}")
+    #     # Name
+    #     st.markdown(f"### {enemy.get('name')}")
 
-        # Image
-        # img_path = get_tag_image_path(enemy.get("pokemon_id"))
-        # st.write("Looking for:", img_path)
+    #     # Image
+    #     # img_path = get_tag_image_path(enemy.get("pokemon_id"))
+    #     # st.write("Looking for:", img_path)
         
 
-        img_path = get_tag_image_path(enemy.get("pokemon_id"))
-        st.write("Looking for:", img_path)
-        st.write("Exists?", os.path.exists(img_path))
-        try:
-            st.image(img_path, use_column_width=True)
-        except Exception:
-            st.write("(No image found)")
+    #     img_path = get_tag_image_path(enemy.get("pokemon_id"))
+    #     st.write("Looking for:", img_path)
+    #     st.write("Exists?", os.path.exists(img_path))
+    #     try:
+    #         st.image(img_path, use_column_width=True)
+    #     except Exception:
+    #         st.write("(No image found)")
 
-        # Types
-        st.write("Types:")
-        show_types(enemy.get("types") or [])
+    #     # Types
+    #     st.write("Types:")
+    #     show_types(enemy.get("types") or [])
 
-        # Stats in columns for nicer layout
-        stats_cols = st.columns(3)
-        stats_cols[0].metric("HP", enemy.get("hp"))
-        stats_cols[1].metric("Attack", enemy.get("attack"))
-        stats_cols[2].metric("Speed", enemy.get("speed"))
+    #     # Stats in columns for nicer layout
+    #     stats_cols = st.columns(3)
+    #     stats_cols[0].metric("HP", enemy.get("hp"))
+    #     stats_cols[1].metric("Attack", enemy.get("attack"))
+    #     stats_cols[2].metric("Speed", enemy.get("speed"))
+
+
+def get_tag_image_path(pokemon_id: str) -> Path:
+    return Path(__file__).parent / "images" / f"pm_en_{pokemon_id}_f.jpg"
+
+def enemy_card(enemy):
+    img_path = get_tag_image_path(enemy.get("pokemon_id"))
+    try:
+        image = Image.open(img_path)
+        st.image(image, use_column_width=True, caption=enemy.get("name"))
+    except Exception as ex:
+        st.write("(Image failed to load)", ex)
 
 
 # -------------------------
