@@ -289,31 +289,65 @@ def enemy_card(enemy):
 
 def team_card(recommendations):
     st.markdown("**Recommended Team Against This Enemy:**")
+    with st.container():
+        st.markdown("---")  # separator
+        st.markdown(f"### \#1: {recommendations.get('name')}")
 
-    # Arrange recommendations in rows of 3
-    for i in range(0, len(recommendations)):
-        row = recommendations[i:i+3]
-        cols = st.columns(len(row))
-        for c, r in zip(cols, row):
-            with c:
-                with st.container():
-                    # Two-column layout inside each team card
-                    inner_cols = st.columns([1, 2])
-                    with inner_cols[0]:
-                        img_path = get_tag_image_path(r["pokemon_id"])
-                        try:
-                            st.image(img_path, use_container_width=True)
-                        except Exception:
-                            st.write("(No image)")
-                        st.write(f"**{r['name']}**")
-                    with inner_cols[1]:
-                        st.write("**Move Type:**")
-                        show_types([r["move_type"]])
-                        st.write("**Types:**")
-                        show_types(r["types"] or [])
-                        st.write(f"Attack: {r['attack']}")
-                        st.write(f"Speed: {r['speed']}")
-                        st.write(f"Score: {r['score']}")
+        inner_cols = st.columns([1,2])
+        with inner_cols[0]:
+        # Image
+            img_path = get_tag_image_path(r["pokemon_id"])
+            try:
+                image = Image.open(img_path)
+                st.image(image, use_container_width=True)
+                st.write(f"**{r['name']}**")
+            except Exception as ex:
+                st.write("(Image failed to load)", ex)
+        with inner_cols[1]:
+            st.write("Move Type:")
+            show_types(recommendations.get("move_type") or [])
+            # Types
+            st.write("Types:")
+            show_types(recommendations.get("types") or [])
+
+            # Stats in columns
+            stats_cols = st.columns(3)
+            stats_cols[0].metric("HP", enemy.get("hp"))
+            stats_cols[1].metric("Attack", enemy.get("attack"))
+            stats_cols[2].metric("Speed", enemy.get("speed"))
+
+        st.markdown("---")  # separator
+
+
+
+
+# def team_card(recommendations):
+#     st.markdown("**Recommended Team Against This Enemy:**")
+
+#     # Arrange recommendations in rows of 3
+#     for i in range(0, len(recommendations)):
+#         row = recommendations[i:i+3]
+#         cols = st.columns(len(row))
+#         for c, r in zip(cols, row):
+#             with c:
+#                 with st.container():
+#                     # Two-column layout inside each team card
+#                     inner_cols = st.columns([1, 2])
+#                     with inner_cols[0]:
+#                         img_path = get_tag_image_path(r["pokemon_id"])
+#                         try:
+#                             st.image(img_path, use_container_width=True)
+#                         except Exception:
+#                             st.write("(No image)")
+#                         st.write(f"**{r['name']}**")
+#                     with inner_cols[1]:
+#                         st.write("**Move Type:**")
+#                         show_types([r["move_type"]])
+#                         st.write("**Types:**")
+#                         show_types(r["types"] or [])
+#                         st.write(f"Attack: {r['attack']}")
+#                         st.write(f"Speed: {r['speed']}")
+#                         st.write(f"Score: {r['score']}")
 
 
 
