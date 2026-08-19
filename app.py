@@ -235,27 +235,27 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
                     # compact team card inside the merged card
                     st.markdown("###")
                     st.markdown(f"**{r.get('name')}**")
-                    inner_cols = st.columns([1, 2])
-                    with inner_cols[0]:
-                        img_path = get_tag_image_path(r.get("pokemon_id"))
-                        try:
-                            if img_path.exists():
-                                image = Image.open(img_path)
-                                st.image(image, use_container_width=True)
-                            else:
-                                st.write("(Image not found)")
-                        except Exception as ex:
-                            st.write("(Image failed to load)", ex)
-                    with inner_cols[1]:
-                        st.write("**Move Type:**")
-                        show_types([r.get("move_type")] if r.get("move_type") else [])
-                        st.write("**Types:**")
-                        show_types(r.get("types") or [])
-                        # Stats: Attack, Speed, Score
-                        stats = st.columns(3)
-                        stats[0].metric("Attack", r.get("attack", 0))
-                        stats[1].metric("Speed", r.get("speed", 0))
-                        stats[2].metric("Score", r.get("score", 0))
+                    # inner_cols = st.columns([1, 2])
+                    # with inner_cols[0]:
+                    img_path = get_tag_image_path(r.get("pokemon_id"))
+                    try:
+                        if img_path.exists():
+                            image = Image.open(img_path)
+                            st.image(image, use_container_width=True)
+                        else:
+                            st.write("(Image not found)")
+                    except Exception as ex:
+                        st.write("(Image failed to load)", ex)
+                    # with inner_cols[1]:
+                    st.write("**Move Type:**")
+                    show_types([r.get("move_type")] if r.get("move_type") else [])
+                    st.write("**Types:**")
+                    show_types(r.get("types") or [])
+                    # Stats: Attack, Speed, Score
+                    stats = st.columns(3)
+                    stats[0].metric("Attack", r.get("attack", 0))
+                    stats[1].metric("Speed", r.get("speed", 0))
+                    stats[2].metric("Score", r.get("score", 0))
         st.markdown("---")
 
 # -------------------------
