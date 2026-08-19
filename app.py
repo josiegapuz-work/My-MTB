@@ -224,7 +224,7 @@ def team_card(recommendations: List[Dict[str, Any]]):
         st.write("No recommendations available.")
         return
 
-    # st.markdown("**Recommended Team Against This Enemy:**")
+    st.markdown("**Recommended Team Against This Enemy:**")
 
     # Render in rows of up to 3 cards per row
     for row_start in range(0, len(recommendations), 3):
@@ -367,8 +367,8 @@ owned_tags = [name_map[n] for n in owned if n in name_map]
 
 # For each enemy: the 6 recommended team cards underneath
 for enemy in enemies:
-    st.markdown(f"***Recommendations against {enemy.get('name')}***")
-    # enemy_card(enemy)
+    # st.markdown(f"***Recommendations against {enemy.get('name')}***")
+    enemy_card(enemy)
 
     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
     if not recs:
