@@ -193,7 +193,7 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
 # -------------------------
 # Aesthetics
 # -------------------------
-
+import os
 def enemy_card(enemy):
     # Outer container
     with st.container():
@@ -204,9 +204,14 @@ def enemy_card(enemy):
         st.markdown(f"### {enemy.get('name')}")
 
         # Image
+        # img_path = get_tag_image_path(enemy.get("pokemon_id"))
+        # st.write("Looking for:", img_path)
+        
+
         img_path = get_tag_image_path(enemy.get("pokemon_id"))
         st.write("Looking for:", img_path)
-        st.image(img_path, use_column_width=True)
+        st.write("Exists?", os.path.exists(img_path))
+
 
         try:
             st.image(img_path, use_column_width=True)
