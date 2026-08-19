@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import streamlit as st
 import os
+from pathlib import Path
 
 # Optional Google Sheets libs (required in requirements.txt)
 try:
@@ -175,12 +176,16 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
 # -------------------------
 # Aesthetics
 # -------------------------
+# def get_tag_image_path(pokemon_id: str) -> str:
+#     # Adjust folder name if different
+#     base_dir = os.path.dirname(__file__)  # folder where app.py lives
+#     return os.path.join(base_dir, "images", f"pm_en_{pokemon_id}_f.jpg")
+#     # return f"images/pm_en_{pokemon_id}_f.jpg"
+
 def get_tag_image_path(pokemon_id: str) -> str:
-    # Adjust folder name if different
-    base_dir = os.path.dirname(__file__)  # folder where app.py lives
-    return os.path.join(base_dir, "images", f"pm_en_{pokemon_id}_f.jpg")
-    # return f"images/pm_en_{pokemon_id}_f.jpg"
-    
+    # Resolve path relative to app.py
+    base_dir = Path(__file__).parent
+    return str(base_dir / "images" / f"pm_en_{pokemon_id}_f.jpg")
 
 
 
