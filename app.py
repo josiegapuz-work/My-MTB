@@ -291,7 +291,7 @@ def team_card(recommendations):
     st.markdown("**Recommended Team Against This Enemy:**")
 
     # Arrange recommendations in rows of 3
-    for i in range(0, len(recommendations), 3):
+    for i in range(0, len(recommendations), 1):
         row = recommendations[i:i+3]
         cols = st.columns(len(row))
         for c, r in zip(cols, row):
@@ -302,7 +302,7 @@ def team_card(recommendations):
                     with inner_cols[0]:
                         img_path = get_tag_image_path(r["pokemon_id"])
                         try:
-                            st.image(img_path, width=120)
+                            st.image(img_path, use_container_width=True)
                         except Exception:
                             st.write("(No image)")
                         st.write(f"**{r['name']}**")
