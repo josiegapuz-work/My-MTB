@@ -199,7 +199,7 @@ def enemy_card(enemy: Dict[str, Any]):
         try:
             if img_path.exists():
                 image = Image.open(img_path)
-                st.image(image, use_column_width=True)
+                st.image(image, use_container_width=True)
             else:
                 st.write("(Image not found)")
         except Exception as ex:
@@ -242,8 +242,8 @@ def team_card(recommendations: List[Dict[str, Any]]):
                     try:
                         if img_path.exists():
                             image = Image.open(img_path)
-                            # use_column_width True keeps it responsive on mobile
-                            st.image(image, use_column_width=True)
+                            # use_container_width True keeps it responsive on mobile
+                            st.image(image, use_container_width=True)
                         else:
                             st.write("(Image not found)")
                     except Exception as ex:
@@ -349,7 +349,7 @@ if enemies:
                 img_path = get_tag_image_path(e.get("pokemon_id"))
                 if img_path.exists():
                     image = Image.open(img_path)
-                    st.image(image, use_column_width=True)
+                    st.image(image, use_container_width=True)
                 else:
                     st.write("(No image)")
             except Exception:
