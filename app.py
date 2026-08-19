@@ -156,7 +156,7 @@ def save_owned_local(owned_list: List[str]):
 # -------------------------
 # Load tags JSON (local file)
 # -------------------------
-DEFAULT_TAGS_FILE = "[02]stardust_v3_tags.json"
+DEFAULT_TAGS_FILE = "[03]stardust_v3_tags.json"
 def load_tags(path: str) -> List[Dict[str, Any]]:
     p = Path(path)
     if not p.exists():
@@ -278,6 +278,11 @@ for enemy in enemies:
         continue
     rows = []
     for r in recs:
+        img_path = get_tag_image_path(r["pokemon_id"])
+        try:
+            st.image(img_path, caption=r["name"], width=120)
+        except Exception:
+            st.write("(No image)")
         rows.append({
             "Name": r["name"],
             "Move Type": r["move_type"],
@@ -287,6 +292,20 @@ for enemy in enemies:
             "Score": r["score"]
         })
     st.table(rows)
+
+# for r in recs:
+#     img_path = get_tag_image_path(r["pokemon_id"])
+#     cols = st.columns([1, 3])
+#     with cols[0]:
+#         try:
+#             st.image(img_path, caption=r["name"], width=120)
+#         except Exception:
+#             st.write("(No image)")
+#     with cols[1]:
+#         st.write(f"**{r['name']}**")
+#         st.write(f"Move Type: {r['move_type']}")
+#         st.write(f"Types: {r['types']}")
+#         st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
 
 st.markdown("---")
 st.info("Type effectiveness dominates the ranking, then attack, then speed.")
@@ -300,19 +319,19 @@ st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 #         st.write("(No image found)")
 #     st.write(f"Types: {', '.join(enemy.get('types') or [])}")
 
-for r in recs:
-    img_path = get_tag_image_path(r["pokemon_id"])
-    cols = st.columns([1, 3])
-    with cols[0]:
-        try:
-            st.image(img_path, caption=r["name"], width=120)
-        except Exception:
-            st.write("(No image)")
-    with cols[1]:
-        st.write(f"**{r['name']}**")
-        st.write(f"Move Type: {r['move_type']}")
-        st.write(f"Types: {r['types']}")
-        st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
+# for r in recs:
+#     img_path = get_tag_image_path(r["pokemon_id"])
+#     cols = st.columns([1, 3])
+#     with cols[0]:
+#         try:
+#             st.image(img_path, caption=r["name"], width=120)
+#         except Exception:
+#             st.write("(No image)")
+#     with cols[1]:
+#         st.write(f"**{r['name']}**")
+#         st.write(f"Move Type: {r['move_type']}")
+#         st.write(f"Types: {r['types']}")
+#         st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
 
 
 # # Footer: quick deploy notes
