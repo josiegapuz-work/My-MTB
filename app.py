@@ -187,7 +187,7 @@ name_map = {t.get("name"): t for t in tags}
 all_names = sorted(name_map.keys())
 
 # Sidebar: persistence controls
-st.sidebar.header("Persistence")
+st.sidebar.header("Enter your Google Sheet ID to save your Tags!")
 sheet_id_secret = st.secrets.get("owned_sheet_id", "")
 sheet_id_input = st.sidebar.text_input("Google Sheet ID (optional)", value=sheet_id_secret)
 use_sheet = bool(sheet_id_input and st.secrets.get("gcp_service_account"))
@@ -253,8 +253,15 @@ cols = st.columns(len(enemies) if enemies else 1)
 for c, e in zip(cols, enemies):
     with c:
         st.markdown(f"**{e.get('name')}**")
+        for enemy in enemies:
+            img_path = get_tag_image_path(enemy.get("pokemon_id"))
+            try:
+                st.image(img_path, caption=enemy.get("name"), width=200)
+            except Exception:
+                st.write("(No image found)")
         st.write(f"Types: {', '.join(e.get('types') or [])}")
         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
+
 
 if not owned:
     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
@@ -285,14 +292,14 @@ for enemy in enemies:
 st.markdown("---")
 st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 
-for enemy in enemies:
-    st.markdown(f"### {enemy.get('name')}")
-    img_path = get_tag_image_path(enemy.get("pokemon_id"))
-    try:
-        st.image(img_path, caption=enemy.get("name"), width=200)
-    except Exception:
-        st.write("(No image found)")
-    st.write(f"Types: {', '.join(enemy.get('types') or [])}")
+# for enemy in enemies:
+#     st.markdown(f"### {enemy.get('name')}")
+#     img_path = get_tag_image_path(enemy.get("pokemon_id"))
+#     try:
+#         st.image(img_path, caption=enemy.get("name"), width=200)
+#     except Exception:
+#         st.write("(No image found)")
+#     st.write(f"Types: {', '.join(enemy.get('types') or [])}")
 
 for r in recs:
     img_path = get_tag_image_path(r["pokemon_id"])
