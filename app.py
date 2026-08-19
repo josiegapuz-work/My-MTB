@@ -266,6 +266,20 @@ else:
     enemies = [name_map[n] for n in enemy_choices if n in name_map]
 
 # Main UI: show enemies
+# st.subheader("Selected Enemies")
+# cols = st.columns(len(enemies) if enemies else 1)
+# for c, e in zip(cols, enemies):
+#     with c:
+#         st.markdown(f"**{e.get('name')}**")
+#         img_path = get_tag_image_path(e.get("pokemon_id"))
+#         try:
+#             st.image(img_path, caption=e.get("name"), width=200)
+#         except Exception:
+#             st.write("(No image found)")
+#         st.write("Types:")
+#         show_types(e.get("types") or [])
+#         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
+
 st.subheader("Selected Enemies")
 cols = st.columns(len(enemies) if enemies else 1)
 for c, e in zip(cols, enemies):
@@ -276,8 +290,10 @@ for c, e in zip(cols, enemies):
             st.image(img_path, caption=e.get("name"), width=200)
         except Exception:
             st.write("(No image found)")
+
         st.write("Types:")
         show_types(e.get("types") or [])
+
         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
 
 
