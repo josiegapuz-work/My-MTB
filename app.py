@@ -165,6 +165,12 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
     with p.open(encoding="utf-8") as f:
         return json.load(f)
 
+def get_tag_image_path(pokemon_id: str) -> str:
+    # Adjust folder name if different
+    return f"images/pm_en_{pokemon_id}_f.jpg"
+
+
+
 # -------------------------
 # Streamlit UI
 # -------------------------
@@ -279,12 +285,36 @@ for enemy in enemies:
 st.markdown("---")
 st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 
-# Footer: quick deploy notes
-st.markdown("#### Deployment notes")
-st.markdown(
-    """
-- Add `streamlit`, `gspread`, and `google-auth` to your requirements.txt.
-- On Streamlit Community Cloud add two secrets: `gcp_service_account` (paste service account JSON) and `owned_sheet_id` (your sheet ID).
-- If you prefer the sheet to store pokemon_id instead of names, change the save/load functions accordingly.
-"""
-)
+for enemy in enemies:
+    st.markdown(f"### {enemy.get('name')}")
+    img_path = get_tag_image_path(enemy.get("pokemon_id"))
+    try:
+        st.image(img_path, caption=enemy.get("name"), width=200)
+    except Exception:
+        st.write("(No image found)")
+    st.write(f"Types: {', '.join(enemy.get('types') or [])}")
+
+for r in recs:
+    img_path = get_tag_image_path(r["pokemon_id"])
+    cols = st.columns([1, 3])
+    with cols[0]:
+        try:
+            st.image(img_path, caption=r["name"], width=120)
+        except Exception:
+            st.write("(No image)")
+    with cols[1]:
+        st.write(f"**{r['name']}**")
+        st.write(f"Move Type: {r['move_type']}")
+        st.write(f"Types: {r['types']}")
+        st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
+
+
+# # Footer: quick deploy notes
+# st.markdown("#### Deployment notes")
+# st.markdown(
+#     """
+# - Add `streamlit`, `gspread`, and `google-auth` to your requirements.txt.
+# - On Streamlit Community Cloud add two secrets: `gcp_service_account` (paste service account JSON) and `owned_sheet_id` (your sheet ID).
+# - If you prefer the sheet to store pokemon_id instead of names, change the save/load functions accordingly.
+# """
+# )
