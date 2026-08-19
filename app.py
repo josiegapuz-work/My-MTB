@@ -279,12 +279,13 @@ for enemy in enemies:
     rows = []
     for r in recs:
         img_path = get_tag_image_path(r["pokemon_id"])
-        try:
-            st.image(img_path, caption=r["name"], width=120)
-        except Exception:
-            st.write("(No image)")
+
         rows.append({
-            "Name": r["name"],
+            "Name": r["name"]
+            try:
+                st.image(img_path, caption=r["name"], width=120)
+            except Exception:
+                st.write("(No image)"),
             "Move Type": r["move_type"],
             "Types": ", ".join(r["types"] or []),
             "Attack": r["attack"],
