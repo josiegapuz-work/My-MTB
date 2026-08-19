@@ -94,10 +94,14 @@ def recommend_against_enemy(owned_tags: List[Dict[str, Any]], enemy: Dict[str, A
         })
     return results
 
-def get_tag_image_path(pokemon_id: str) -> str:
-    # Adjust folder name if different
-    return f"images/pm_en_{pokemon_id}_f.jpg"
+# def get_tag_image_path(pokemon_id: str) -> str:
+#     # Adjust folder name if different
+#     return f"images/pm_en_{pokemon_id}_f.jpg"
 
+def get_tag_image_path(pokemon_id: str) -> str:
+    # Always resolve relative to app.py location
+    base_dir = os.path.dirname(__file__)
+    return os.path.join(base_dir, "images", f"pm_en_{pokemon_id}_f.png")
 
 def show_types(types: list[str]):
     """Display type icons with names side by side."""
