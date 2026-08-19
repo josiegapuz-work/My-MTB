@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import streamlit as st
 
-# Optional Google Sheets libs
+# Optional Google Sheets libs (required in requirements.txt)
 try:
     import gspread
     from google.oauth2.service_account import Credentials
@@ -99,7 +99,7 @@ def recommend_against_enemy(owned_tags: List[Dict[str, Any]], enemy: Dict[str, A
 # -------------------------
 def get_gsheet_client_from_secrets():
     """
-    Expects st.secrets["gcp_service_account"] to contain the service account JSON object.
+    Expects st.secrets['gcp_service_account'] to contain the service account JSON object.
     """
     if gspread is None or Credentials is None:
         raise RuntimeError("gspread/google-auth not installed. Add to requirements.txt")
@@ -128,16 +128,35 @@ def save_owned_to_sheet(sheet_id: str, owned_list: List[str]):
         ws = sh.sheet1
         ws.clear()
         if owned_list:
-            # write as column
             ws.update('A1', [[v] for v in owned_list])
         st.success("Saved owned tags to Google Sheet")
     except Exception as e:
         st.error(f"Failed to save owned tags to Google Sheet: {e}")
 
 # -------------------------
+# Local persistence fallback
+# -------------------------
+LOCAL_OWNED_FILE = Path("owned_tags.json")
+
+def load_owned_local() -> List[str]:
+    if LOCAL_OWNED_FILE.exists():
+        try:
+            return json.loads(LOCAL_OWNED_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+    return []
+
+def save_owned_local(owned_list: List[str]):
+    try:
+        LOCAL_OWNED_FILE.write_text(json.dumps(owned_list, ensure_ascii=False, indent=2), encoding="utf-8")
+        st.sidebar.success(f"Saved {len(owned_list)} owned tags locally")
+    except Exception as e:
+        st.sidebar.error(f"Failed to save locally: {e}")
+
+# -------------------------
 # Load tags JSON (local file)
 # -------------------------
-DEFAULT_TAGS_FILE = "[02]stardust_v3_tags.json"
+DEFAULT_TAGS_FILE = "stardust_v3_tags.json"
 def load_tags(path: str) -> List[Dict[str, Any]]:
     p = Path(path)
     if not p.exists():
@@ -161,44 +180,56 @@ if not tags:
 name_map = {t.get("name"): t for t in tags}
 all_names = sorted(name_map.keys())
 
-# Sidebar: Google Sheets persistence controls
-st.sidebar.header("Persistence (Google Sheets)")
-sheet_id = st.sidebar.text_input("Owned tags Google Sheet ID", value=st.secrets.get("owned_sheet_id", ""))
-use_sheet = bool(sheet_id and st.secrets.get("gcp_service_account"))
+# Sidebar: persistence controls
+st.sidebar.header("Persistence")
+sheet_id_secret = st.secrets.get("owned_sheet_id", "")
+sheet_id_input = st.sidebar.text_input("Google Sheet ID (optional)", value=sheet_id_secret)
+use_sheet = bool(sheet_id_input and st.secrets.get("gcp_service_account"))
 
-if sheet_id and not st.secrets.get("gcp_service_account"):
+if sheet_id_input and not st.secrets.get("gcp_service_account"):
     st.sidebar.warning("Add your service account JSON to Streamlit secrets as gcp_service_account to enable Sheets persistence.")
 
-# Load owned defaults from sheet if available, otherwise from local default
+# Determine default owned list (sheet -> local -> first N)
 default_owned = all_names[:12]
 if use_sheet:
-    try:
-        sheet_owned = load_owned_from_sheet(sheet_id)
-        if sheet_owned:
-            # map ids to names if user stored ids; prefer names
-            resolved = []
-            for v in sheet_owned:
-                if v in name_map:
-                    resolved.append(v)
-                else:
-                    # try to match by pokemon_id
-                    match = next((t.get("name") for t in tags if t.get("pokemon_id") == v), None)
-                    if match:
-                        resolved.append(match)
-            if resolved:
-                default_owned = resolved
-    except Exception:
-        pass
+    sheet_owned = load_owned_from_sheet(sheet_id_input)
+    if sheet_owned:
+        resolved = []
+        for v in sheet_owned:
+            if v in name_map:
+                resolved.append(v)
+            else:
+                match = next((t.get("name") for t in tags if t.get("pokemon_id") == v), None)
+                if match:
+                    resolved.append(match)
+        if resolved:
+            default_owned = resolved
+else:
+    local_owned = load_owned_local()
+    if local_owned:
+        resolved = []
+        for v in local_owned:
+            if v in name_map:
+                resolved.append(v)
+            else:
+                match = next((t.get("name") for t in tags if t.get("pokemon_id") == v), None)
+                if match:
+                    resolved.append(match)
+        if resolved:
+            default_owned = resolved
 
 # Owned tags selection UI
 st.sidebar.header("Your Owned Tags")
 owned = st.sidebar.multiselect("Select tags you own", options=all_names, default=default_owned)
 
-# Save to sheet button
+# Save buttons
 if use_sheet:
     if st.sidebar.button("Save owned tags to Google Sheet"):
-        # Save names; you may prefer to save pokemon_id instead
-        save_owned_to_sheet(sheet_id, owned)
+        # Save names; change to IDs if you prefer
+        save_owned_to_sheet(sheet_id_input, owned)
+else:
+    if st.sidebar.button("Save owned tags locally"):
+        save_owned_local(owned)
 
 # Enemy selection
 st.sidebar.header("Enemies to Battle")
@@ -248,16 +279,12 @@ for enemy in enemies:
 st.markdown("---")
 st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 
-# Footer: instructions for Streamlit Cloud
-st.markdown("#### Deploying to Streamlit Community Cloud")
+# Footer: quick deploy notes
+st.markdown("#### Deployment notes")
 st.markdown(
     """
-1. Push this repo to GitHub (include app.py, [02]stardust_v3_tags.json, requirements.txt).  
-2. On Streamlit Cloud, create a new app from the repo.  
-3. In the app settings, add two secrets:  
-   - gcp_service_account (paste the service account JSON object)  
-   - owned_sheet_id (the Google Sheet ID)  
-4. In the app UI sidebar, paste the Sheet ID (or set it in secrets as owned_sheet_id).  
-5. Run the app. The app will read/write your owned tags to the sheet.
+- Add `streamlit`, `gspread`, and `google-auth` to your requirements.txt.
+- On Streamlit Community Cloud add two secrets: `gcp_service_account` (paste service account JSON) and `owned_sheet_id` (your sheet ID).
+- If you prefer the sheet to store pokemon_id instead of names, change the save/load functions accordingly.
 """
 )
