@@ -177,8 +177,10 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
 # -------------------------
 def get_tag_image_path(pokemon_id: str) -> str:
     # Adjust folder name if different
+    base_dir = os.path.dirname(__file__)  # folder where app.py lives
+    return os.path.join(base_dir, "images", f"pm_en_{pokemon_id}_f.jpg")
     # return f"images/pm_en_{pokemon_id}_f.jpg"
-    return os.path.join("images", f"pm_en_{pokemon_id}_f.png")
+    
 
 
 
@@ -195,7 +197,16 @@ def show_types(types: list[str]):
             except Exception:
                 st.write("(No icon)")
             st.caption(t)
-            
+
+
+# for c, e in zip(cols, enemies):
+#     with c:
+#         st.markdown(f"**{e.get('name')}**")
+#         img_path = get_tag_image_path(e.get("pokemon_id"))
+#         try:
+#             st.image(img_path, caption=e.get("name")) #, width=200)
+#         except Exception:
+#             st.write("(No image found)")
 def enemy_card(enemy):
     # Outer container
     with st.container():
@@ -213,8 +224,6 @@ def enemy_card(enemy):
         img_path = get_tag_image_path(enemy.get("pokemon_id"))
         st.write("Looking for:", img_path)
         st.write("Exists?", os.path.exists(img_path))
-
-
         try:
             st.image(img_path, use_column_width=True)
         except Exception:
