@@ -253,12 +253,11 @@ cols = st.columns(len(enemies) if enemies else 1)
 for c, e in zip(cols, enemies):
     with c:
         st.markdown(f"**{e.get('name')}**")
-        for enemy in enemies:
-            img_path = get_tag_image_path(enemy.get("pokemon_id"))
-            try:
-                st.image(img_path, caption=enemy.get("name"), width=200)
-            except Exception:
-                st.write("(No image found)")
+        img_path = get_tag_image_path(e.get("pokemon_id"))
+        try:
+            st.image(img_path, caption=e.get("name"), width=200)
+        except Exception:
+            st.write("(No image found)")
         st.write(f"Types: {', '.join(e.get('types') or [])}")
         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
 
