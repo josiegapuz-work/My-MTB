@@ -96,18 +96,10 @@ def recommend_against_enemy(owned_tags: List[Dict[str, Any]], enemy: Dict[str, A
         })
     return results
 
-
-
-
-
-
 # -------------------------
 # Google Sheets helpers
 # -------------------------
 def get_gsheet_client_from_secrets():
-    """
-    Expects st.secrets['gcp_service_account'] to contain the service account JSON object.
-    """
     if gspread is None or Credentials is None:
         raise RuntimeError("gspread/google-auth not installed. Add to requirements.txt")
     sa_info = st.secrets.get("gcp_service_account")
@@ -172,124 +164,61 @@ def load_tags(path: str) -> List[Dict[str, Any]]:
     with p.open(encoding="utf-8") as f:
         return json.load(f)
 
-
 # -------------------------
-# Aesthetics
+# Aesthetics helpers
 # -------------------------
-def show_types(types: list[str]):
+def show_types(types: List[str]):
     """Display type icons with names side by side."""
     if not types:
         return
+    # On narrow screens, Streamlit will stack columns; this keeps it responsive.
     cols = st.columns(len(types), vertical_alignment="center")
     for c, t in zip(cols, types):
-        img_path = f"types_img/{t}.png"
+        img_path = Path(__file__).parent / "types_img" / f"{t}.png"
         with c:
             try:
-                st.image(img_path, width=50)
+                if img_path.exists():
+                    st.image(str(img_path), width=40)
+                else:
+                    st.caption(t)
             except Exception:
-                st.write("(No icon)")
-            st.caption(t)
+                st.caption(t)
 
 def get_tag_image_path(pokemon_id: str) -> Path:
     return Path(__file__).parent / "images" / f"pm_en_{pokemon_id}_f.jpg"
 
-# for c, e in zip(cols, enemies):
-#     with c:
-#         st.markdown(f"**{e.get('name')}**")
-#         img_path = get_tag_image_path(e.get("pokemon_id"))
-#         try:
-#             st.image(img_path, caption=e.get("name")) #, width=200)
-#         except Exception:
-#             st.write("(No image found)")
-# def enemy_card(enemy):
-#     # Outer container
-#     with st.container():
-#         # Create a bordered box effect using markdown
-#         st.markdown("---")  # simple separator line
-
-#         # Name
-#         st.markdown(f"### {enemy.get('name')}")
-
-#         # Image
-
-#         img_path = get_tag_image_path(enemy.get("pokemon_id"))
-#         # st.write("Looking for:", img_path)
-#         # st.write("Exists?", os.path.exists(img_path))
-#         try:
-#             image = Image.open(img_path)
-#             st.image(image, use_container_width=True)
-#         except Exception as ex:
-#             st.write("(Image failed to load)", ex)
-
-#         # Types
-#         st.write("Types:")
-#         show_types(enemy.get("types") or [])
-
-#         # Stats in columns for nicer layout
-#         stats_cols = st.columns(3)
-#         stats_cols[0].metric("HP", enemy.get("hp"))
-#         stats_cols[1].metric("Attack", enemy.get("attack"))
-#         stats_cols[2].metric("Speed", enemy.get("speed"))
-#         st.markdown("---")  # simple separator line
-
-
-# def team_card(recommendations):
-#     st.markdown("**Recommended Team Against This Enemy:**")
-
-#     # Arrange recommendations in rows of 3
-#     for i in range(0, len(recommendations), 3):
-#         row = recommendations[i:i+3]
-#         cols = st.columns(len(row))
-#         for c, r in zip(cols, row):
-#             with c:
-#                 with st.container():
-#                     inner_cols = st.columns([1, 2])  # left: image+name, right: stats
-#                     with inner_cols[0]:
-#                         img_path = get_tag_image_path(r["pokemon_id"])
-#                         try:
-#                             st.image(img_path, width=120)
-#                         except Exception:
-#                             st.write("(No image)")
-#                         st.write(f"**{r['name']}**")
-#                     with inner_cols[1]:
-#                         st.write(f"**Move Type:**")
-#                         show_types([r["move_type"]])
-#                         st.write(f"**Types:**")
-#                         show_types(r["types"] or [])
-#                         st.write(f"Attack: {r['attack']}")
-#                         st.write(f"Speed: {r['speed']}")
-#                         st.write(f"Score: {r['score']}")
-
-def enemy_card(enemy):
-    # Enemy card container
+# -------------------------
+# Card renderers
+# -------------------------
+def enemy_card(enemy: Dict[str, Any]):
+    """Render an enemy card with image, types, and metrics."""
     with st.container():
-        st.markdown("---")  # separator
-        st.markdown(f"### Enemy: {enemy.get('name')}")
-
-        # Image
+        st.markdown("---")
+        st.markdown(f"### {enemy.get('name')}")
         img_path = get_tag_image_path(enemy.get("pokemon_id"))
         try:
-            image = Image.open(img_path)
-            st.image(image, use_container_width=True)
+            if img_path.exists():
+                image = Image.open(img_path)
+                st.image(image, use_column_width=True)
+            else:
+                st.write("(Image not found)")
         except Exception as ex:
             st.write("(Image failed to load)", ex)
 
-        # Types
         st.write("Types:")
         show_types(enemy.get("types") or [])
 
-        # Stats in columns
         stats_cols = st.columns(3)
         stats_cols[0].metric("HP", enemy.get("hp"))
         stats_cols[1].metric("Attack", enemy.get("attack"))
         stats_cols[2].metric("Speed", enemy.get("speed"))
+        st.markdown("---")
 
-        st.markdown("---")  # separator
-
-
-def team_card(recommendations: list[dict]):
-    """Render recommended team cards in rows of 3.
+def team_card(recommendations: List[Dict[str, Any]]):
+    """
+    Render recommended team cards in rows of 3.
     Each card is a two-column layout: Image+Name | Move Type, Types, Attack, Speed, Score.
+    Designed to be responsive for mobile and desktop.
     """
     if not recommendations:
         st.write("No recommendations available.")
@@ -297,79 +226,40 @@ def team_card(recommendations: list[dict]):
 
     st.markdown("**Recommended Team Against This Enemy:**")
 
-    # Process in rows of 3
+    # Render in rows of up to 3 cards per row
     for row_start in range(0, len(recommendations), 3):
         row = recommendations[row_start:row_start + 3]
         cols = st.columns(len(row))
         for col_idx, (c, r) in enumerate(zip(cols, row)):
-            card_index = row_start + col_idx + 1  # 1-based index for labeling
+            card_index = row_start + col_idx + 1
             with c:
-                with st.container():
-                    st.markdown("---")  # separator for each card
-
-                    # Header with index and name
-                    st.markdown(f"### #{card_index}: {r.get('name')}")
-
-                    # Two-column inner layout: image | stats
-                    inner_cols = st.columns([1, 2])
-                    with inner_cols[0]:
-                        img_path = get_tag_image_path(r.get("pokemon_id"))
-                        try:
+                # Card container
+                st.markdown("----")
+                st.markdown(f"#### #{card_index}: {r.get('name')}")
+                inner_cols = st.columns([1, 2])
+                with inner_cols[0]:
+                    img_path = get_tag_image_path(r.get("pokemon_id"))
+                    try:
+                        if img_path.exists():
                             image = Image.open(img_path)
-                            st.image(image, use_container_width=True)
-                        except Exception as ex:
-                            st.write("(Image failed to load)", ex)
-                        # Name repeated under image (optional)
-                        st.write(f"**{r.get('name')}**")
-
-                    with inner_cols[1]:
-                        st.write("**Move Type:**")
-                        # show_types expects a list of type names
-                        show_types([r.get("move_type")] if r.get("move_type") else [])
-
-                        st.write("**Types:**")
-                        show_types(r.get("types") or [])
-
-                        # Stats in three small metrics (use values from recommendation)
-                        stats_cols = st.columns(3)
-                        stats_cols[0].metric("Attack", r.get("attack", 0))
-                        stats_cols[1].metric("Speed", r.get("speed", 0))
-                        stats_cols[2].metric("Score", r.get("score", 0))
-
-                    st.markdown("---")
-
-
-
-
-# def team_card(recommendations):
-#     st.markdown("**Recommended Team Against This Enemy:**")
-
-#     # Arrange recommendations in rows of 3
-#     for i in range(0, len(recommendations)):
-#         row = recommendations[i:i+3]
-#         cols = st.columns(len(row))
-#         for c, r in zip(cols, row):
-#             with c:
-#                 with st.container():
-#                     # Two-column layout inside each team card
-#                     inner_cols = st.columns([1, 2])
-#                     with inner_cols[0]:
-#                         img_path = get_tag_image_path(r["pokemon_id"])
-#                         try:
-#                             st.image(img_path, use_container_width=True)
-#                         except Exception:
-#                             st.write("(No image)")
-#                         st.write(f"**{r['name']}**")
-#                     with inner_cols[1]:
-#                         st.write("**Move Type:**")
-#                         show_types([r["move_type"]])
-#                         st.write("**Types:**")
-#                         show_types(r["types"] or [])
-#                         st.write(f"Attack: {r['attack']}")
-#                         st.write(f"Speed: {r['speed']}")
-#                         st.write(f"Score: {r['score']}")
-
-
+                            # use_column_width True keeps it responsive on mobile
+                            st.image(image, use_column_width=True)
+                        else:
+                            st.write("(Image not found)")
+                    except Exception as ex:
+                        st.write("(Image failed to load)", ex)
+                    st.write(f"**{r.get('name')}**")
+                with inner_cols[1]:
+                    st.write("**Move Type:**")
+                    show_types([r.get("move_type")] if r.get("move_type") else [])
+                    st.write("**Types:**")
+                    show_types(r.get("types") or [])
+                    # Stats: Attack, Speed, Score
+                    stats_cols = st.columns(3)
+                    stats_cols[0].metric("Attack", r.get("attack", 0))
+                    stats_cols[1].metric("Speed", r.get("speed", 0))
+                    stats_cols[2].metric("Score", r.get("score", 0))
+                st.markdown("----")
 
 # -------------------------
 # Streamlit UI
@@ -431,7 +321,6 @@ owned = st.sidebar.multiselect("Select tags you own", options=all_names, default
 # Save buttons
 if use_sheet:
     if st.sidebar.button("Save owned tags to Google Sheet"):
-        # Save names; change to IDs if you prefer
         save_owned_to_sheet(sheet_id_input, owned)
 else:
     if st.sidebar.button("Save owned tags locally"):
@@ -447,86 +336,45 @@ else:
     enemy_choices = st.sidebar.multiselect("Pick up to 3 enemies", options=all_names, max_selections=3, default=all_names[:3])
     enemies = [name_map[n] for n in enemy_choices if n in name_map]
 
-#========= Main UI: show enemies =========#
-
-# --- Usage ---
+# ========= Main UI: show enemies ========= #
 st.subheader("Selected Enemies")
-cols = st.columns(len(enemies) if enemies else 1)
-for c, e in zip(cols, enemies):
-    with c:
-        enemy_card(e)
 
+# Top row: show selected enemies side-by-side (responsive)
+if enemies:
+    top_cols = st.columns(len(enemies))
+    for c, e in zip(top_cols, enemies):
+        with c:
+            # compact enemy preview (small)
+            try:
+                img_path = get_tag_image_path(e.get("pokemon_id"))
+                if img_path.exists():
+                    image = Image.open(img_path)
+                    st.image(image, use_column_width=True)
+                else:
+                    st.write("(No image)")
+            except Exception:
+                st.write("(Image failed to load)")
+            st.markdown(f"**{e.get('name')}**")
+else:
+    st.write("No enemies selected.")
+
+# Ensure owned tags exist
 if not owned:
     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
     st.stop()
 
-# owned_tags = [name_map[n] for n in owned if n in name_map]
-
-# st.subheader("Selected Enemies")
-# for enemy in enemies:
-#     # enemy_card(enemy)  # show enemy card
-
-#     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
-#     if not recs:
-#         st.write("No recommendations available.")
-#         continue
-
-#     team_card(recs)  # show team cards in rows of 3
-
-
-#========= Compute and display recommendations =========#
-# st.subheader("Recommendations from Your Owned Tags")
-# for enemy in enemies:
-#     st.markdown(f"### Against {enemy.get('name')}")
-#     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
-#     if not recs:
-#         st.write("No recommendations available.")
-#         continue
-
-#     for r in recs:
-#         img_path = get_tag_image_path(r["pokemon_id"])
-#         cols = st.columns([1, 3])  # image column + stats column
-#         with cols[0]:
-#             try:
-#                 st.image(img_path, caption=r["name"], width=120)
-#             except Exception:
-#                 st.write("(No image)")
-#         with cols[1]:
-#             st.write(f"**{r['name']}**")
-#             st.write("Move Type:")
-#             show_types([r["move_type"]])
-#             st.write("Types:")
-#             show_types(r["types"] or [])
-#             st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
-
-
-# st.subheader("Selected Enemies")
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
+# For each enemy: show full enemy card, then the 6 recommended team cards underneath
 for enemy in enemies:
-    # enemy_card(enemy)  # show enemy card
+    enemy_card(enemy)
 
     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
     if not recs:
         st.write("No recommendations available.")
         continue
 
-    team_card(recs)  # show team cards directly under enemy card
-
-
-
-
+    team_card(recs)
 
 st.markdown("---")
 st.info("Type effectiveness dominates the ranking, then attack, then speed.")
-
-
-# # Footer: quick deploy notes
-# st.markdown("#### Deployment notes")
-# st.markdown(
-#     """
-# - Add `streamlit`, `gspread`, and `google-auth` to your requirements.txt.
-# - On Streamlit Community Cloud add two secrets: `gcp_service_account` (paste service account JSON) and `owned_sheet_id` (your sheet ID).
-# - If you prefer the sheet to store pokemon_id instead of names, change the save/load functions accordingly.
-# """
-# )
