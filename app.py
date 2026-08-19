@@ -268,27 +268,27 @@ if not owned:
 
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
-# Compute and display recommendations
-# st.subheader("Recommendations from Your Owned Tags")
-# for enemy in enemies:
-#     st.markdown(f"### Against {enemy.get('name')}")
-#     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
-#     if not recs:
-#         st.write("No recommendations available.")
-#         continue
-#     rows = []
-#     for r in recs:
-#         img_path = get_tag_image_path(r["pokemon_id"])
+#Compute and display recommendations
+st.subheader("Recommendations from Your Owned Tags")
+for enemy in enemies:
+    st.markdown(f"### Against {enemy.get('name')}")
+    recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
+    if not recs:
+        st.write("No recommendations available.")
+        continue
+    rows = []
+    for r in recs:
+        img_path = get_tag_image_path(r["pokemon_id"])
 
-#         rows.append({
-#             "Name": r["name"],
-#             "Move Type": r["move_type"],
-#             "Types": ", ".join(r["types"] or []),
-#             "Attack": r["attack"],
-#             "Speed": r["speed"],
-#             "Score": r["score"]
-#         })
-#     st.table(rows)
+        rows.append({
+            "Name": r["name"],
+            "Move Type": r["move_type"],
+            "Types": ", ".join(r["types"] or []),
+            "Attack": r["attack"],
+            "Speed": r["speed"],
+            "Score": r["score"]
+        })
+    st.table(rows)
 
 # st.subheader("Recommendations from Your Owned Tags")
 # for enemy in enemies:
@@ -311,28 +311,6 @@ owned_tags = [name_map[n] for n in owned if n in name_map]
 #             st.write(f"Move Type: {r['move_type']}")
 #             st.write(f"Types: {', '.join(r['types'] or [])}")
 #             st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
-
-st.subheader("Recommendations from Your Owned Tags")
-for enemy in enemies:
-    st.markdown(f"### Against {enemy.get('name')}")
-    recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
-    if not recs:
-        st.write("No recommendations available.")
-        continue
-
-    for r in recs:
-        img_path = get_tag_image_path(r["pokemon_id"])
-        # Build HTML block with name + image + stats
-        block = f"""
-        <div style="text-align:center; margin-bottom:20px;">
-            <strong>{r['name']}</strong><br>
-            <img src="{img_path}" alt="{r['name']}" width="120"><br>
-            Move Type: {r['move_type']}<br>
-            Types: {', '.join(r['types'] or [])}<br>
-            Attack: {r['attack']} | Speed: {r['speed']} | Score: {r['score']}
-        </div>
-        """
-        st.markdown(block, unsafe_allow_html=True)
 
 
 # for r in recs:
