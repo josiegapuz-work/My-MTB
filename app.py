@@ -156,7 +156,7 @@ def save_owned_local(owned_list: List[str]):
 # -------------------------
 # Load tags JSON (local file)
 # -------------------------
-DEFAULT_TAGS_FILE = "stardust_v3_tags.json"
+DEFAULT_TAGS_FILE = "[02]stardust_v3_tags.json"
 def load_tags(path: str) -> List[Dict[str, Any]]:
     p = Path(path)
     if not p.exists():
