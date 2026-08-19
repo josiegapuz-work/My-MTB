@@ -233,6 +233,26 @@ def enemy_card(enemy):
         st.markdown("---")  # simple separator line
 
 
+def team_card(recom):
+    st.markdown("**Recommended Team Against This Enemy:**")
+    for r in recom:
+        with st.container():
+            cols = st.columns([1, 2])  # left: image+name, right: stats
+            with cols[0]:
+                img_path = get_tag_image_path(r["pokemon_id"])
+                try:
+                    st.image(img_path, width=120)
+                except Exception:
+                    st.write("(No image)")
+                st.write(f"**{r['name']}**")
+            with cols[1]:
+                st.write(f"**Move Type:**")
+                show_types([r["move_type"]])
+                st.write(f"**Types:**")
+                show_types(r["types"] or [])
+                st.write(f"Attack: {r['attack']}")
+                st.write(f"Speed: {r['speed']}")
+                st.write(f"Score: {r['score']}")
 # -------------------------
 # Streamlit UI
 # -------------------------
@@ -324,30 +344,41 @@ if not owned:
 
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
-#========= Compute and display recommendations =========#
 st.subheader("Recommendations from Your Owned Tags")
 for enemy in enemies:
-    st.markdown(f"### Against {enemy.get('name')}")
+    enemy_card(enemy)  # show enemy card
+
     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
     if not recs:
         st.write("No recommendations available.")
         continue
 
-    for r in recs:
-        img_path = get_tag_image_path(r["pokemon_id"])
-        cols = st.columns([1, 3])  # image column + stats column
-        with cols[0]:
-            try:
-                st.image(img_path, caption=r["name"], width=120)
-            except Exception:
-                st.write("(No image)")
-        with cols[1]:
-            st.write(f"**{r['name']}**")
-            st.write("Move Type:")
-            show_types([r["move_type"]])
-            st.write("Types:")
-            show_types(r["types"] or [])
-            st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
+    team_card(recs)  # show team card separately
+
+#========= Compute and display recommendations =========#
+# st.subheader("Recommendations from Your Owned Tags")
+# for enemy in enemies:
+#     st.markdown(f"### Against {enemy.get('name')}")
+#     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
+#     if not recs:
+#         st.write("No recommendations available.")
+#         continue
+
+#     for r in recs:
+#         img_path = get_tag_image_path(r["pokemon_id"])
+#         cols = st.columns([1, 3])  # image column + stats column
+#         with cols[0]:
+#             try:
+#                 st.image(img_path, caption=r["name"], width=120)
+#             except Exception:
+#                 st.write("(No image)")
+#         with cols[1]:
+#             st.write(f"**{r['name']}**")
+#             st.write("Move Type:")
+#             show_types([r["move_type"]])
+#             st.write("Types:")
+#             show_types(r["types"] or [])
+#             st.write(f"Attack: {r['attack']}, Speed: {r['speed']}, Score: {r['score']}")
 
 
 st.markdown("---")
@@ -363,7 +394,3 @@ st.info("Type effectiveness dominates the ranking, then attack, then speed.")
 # - If you prefer the sheet to store pokemon_id instead of names, change the save/load functions accordingly.
 # """
 # )
-
-
-img_path = "/mount/src/my-mtb/images/pm_en_1-3-010_f.jpg"
-Image.open(img_path).verify()
