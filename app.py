@@ -278,8 +278,8 @@ for c, e in zip(cols, enemies):
         except Exception:
             st.write("(No image found)")
 
-        st.write("Types:" + show_types(e.get("types") or []))
-        # show_types(e.get("types") or [])
+        st.write("Types:")
+        show_types(e.get("types") or [])
 
         st.write(f"HP: {e.get('hp')}, Attack: {e.get('attack')}, Speed: {e.get('speed')}")
 
