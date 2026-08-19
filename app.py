@@ -346,7 +346,7 @@ owned_tags = [name_map[n] for n in owned if n in name_map]
 
 st.subheader("Recommendations from Your Owned Tags")
 for enemy in enemies:
-    enemy_card(enemy)  # show enemy card
+    # enemy_card(enemy)  # show enemy card
 
     recs = recommend_against_enemy(owned_tags, enemy, top_n=6)
     if not recs:
