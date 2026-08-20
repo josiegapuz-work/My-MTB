@@ -114,16 +114,17 @@ for i in range(max_tabs):
     if i < len(enemies):
         names.append(enemies[i].get("name", "Unknown"))
     else:
-        names.append(f"Slot {i+1}")
-enemy_tabs = st.tabs(names)
+        names.append(f"Select Enemy {i+1}")
+enemy1, enemy2, enemy3 = st.tabs(names)
 
-# for row_start in range(0, len(enemies), 3):
-#     row = enemies[row_start:row_start + 3]
-#     cols = st.columns(len(row))
-#     for c, enemy in zip(cols, row):
-#         with c:
-#             recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
-#             enemy_with_team_card(enemy, recs)
+with enemy1:
+    for row_start in range(0, len(enemies), 3):
+        row = enemies[row_start:row_start + 3]
+        cols = st.columns(len(row))
+        for c, enemy in zip(cols, row):
+            with c:
+                recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
+                enemy_with_team_card(enemy, recs)
 
 
 #======== OLD Version ========#
