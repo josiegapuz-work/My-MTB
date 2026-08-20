@@ -5,7 +5,13 @@ from typing import List, Dict, Any
 import streamlit as st
 import os
 from PIL import Image
-from pkmon_types import type_chart
+
+#=======================#
+#===== Own Modules =====#
+#=======================#
+
+from type_chart import show_chart
+
 
 # Optional Google Sheets libs (required in requirements.txt)
 try:
@@ -15,7 +21,7 @@ except Exception:
     gspread = None
     Credentials = None
 
-type_chart()
+print(show_chart())
 
 # -------------------------
 # Helpers: type and scoring
