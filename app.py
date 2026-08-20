@@ -105,15 +105,25 @@ owned_tags = [name_map[n] for n in owned if n in name_map]
 
 # st.write(f"{enemies}")
 
-enemy_tabs = st.tabs([f"{enemies[len(enemies)-len(enemies)].get('name')}", f"{enemies[len(enemies)-len(enemies)+1].get('name')}", f"{enemies[len(enemies)-len(enemies)+2].get('name')}"])
+# enemy_tabs = st.tabs([f"{enemies[0].get('name')}", f"{enemies[1].get('name')}", f"{enemies[2].get('name')}"])
 
-for row_start in range(0, len(enemies), 3):
-    row = enemies[row_start:row_start + 3]
-    cols = st.columns(len(row))
-    for c, enemy in zip(cols, row):
-        with c:
-            recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
-            enemy_with_team_card(enemy, recs)
+# create up to 3 tabs, using placeholders if fewer enemies selected
+max_tabs = 3
+names = []
+for i in range(max_tabs):
+    if i < len(enemies):
+        names.append(enemies[i].get("name", "Unknown"))
+    else:
+        names.append(f"Slot {i+1}")
+enemy_tabs = st.tabs(names)
+
+# for row_start in range(0, len(enemies), 3):
+#     row = enemies[row_start:row_start + 3]
+#     cols = st.columns(len(row))
+#     for c, enemy in zip(cols, row):
+#         with c:
+#             recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
+#             enemy_with_team_card(enemy, recs)
 
 
 #======== OLD Version ========#
