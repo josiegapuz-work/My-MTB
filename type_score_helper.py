@@ -1,3 +1,7 @@
+from pathlib import Path
+from typing import List, Dict, Any
+import streamlit as st
+
 # -------------------------
 # Type chart (full 18 types)
 # -------------------------
@@ -22,5 +26,60 @@ type_chart = {
     "Fairy": {"super_effective": ["Fighting", "Dragon", "Dark"], "not_very_effective": ["Fire", "Poison", "Steel"], "immune": []}
 }
 
-def show_chart():
-    return type_chart
+# -------------------------
+# Helpers: type and scoring
+# -------------------------
+def normalize_type(t):
+    return t.strip().title() if isinstance(t, str) and t.strip() != "" else None
+
+def get_move_type(tag: Dict[str, Any]) -> str:
+    mt = tag.get("move_1_type") or (tag.get("types")[0] if tag.get("types") else None)
+    return normalize_type(mt) or ""
+
+def type_multiplier(attacker_type: str, defender_types: List[str]) -> float:
+    if not attacker_type:
+        return 1.0
+    attacker_type = normalize_type(attacker_type)
+    mult = 1.0
+    chart = type_chart.get(attacker_type, {})
+    for d in defender_types:
+        dnorm = normalize_type(d)
+        if not dnorm:
+            continue
+        if dnorm in chart.get("super_effective", []):
+            mult *= 2.0
+        elif dnorm in chart.get("not_very_effective", []):
+            mult *= 0.5
+        elif dnorm in chart.get("immune", []):
+            mult *= 0.0
+        else:
+            mult *= 1.0
+    return mult
+
+def compute_score(attacker: Dict[str, Any], defender: Dict[str, Any]) -> float:
+    defender_types = defender.get("types", []) or []
+    move_type = get_move_type(attacker)
+    t_mult = type_multiplier(move_type, defender_types)
+    attack_val = int(attacker.get("attack") or 0)
+    speed_val = int(attacker.get("speed") or 0)
+    final = int(t_mult * 100000) + attack_val * 100 + speed_val
+    return final
+
+def recommend_against_enemy(owned_tags: List[Dict[str, Any]], enemy: Dict[str, Any], top_n: int = 6) -> List[Dict[str, Any]]:
+    scored = []
+    for tag in owned_tags:
+        score = compute_score(tag, enemy)
+        scored.append((score, tag))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    results = []
+    for s, tag in scored[:top_n]:
+        results.append({
+            "pokemon_id": tag.get("pokemon_id"),
+            "name": tag.get("name"),
+            "types": tag.get("types"),
+            "move_type": get_move_type(tag),
+            "attack": tag.get("attack") or 0,
+            "speed": tag.get("speed") or 0,
+            "score": s
+        })
+    return results
