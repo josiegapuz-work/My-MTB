@@ -105,6 +105,7 @@ owned_tags = [name_map[n] for n in owned if n in name_map]
 
 st.write(f"{enemies}")
 
+enemy1, enemy2, enemy3 = st.tabs([f"{enemies[0].get('name')}", f"{enemies[1].get('name')}", f"{enemies[2].get('name')}"])
 
 for row_start in range(0, len(enemies), 3):
     row = enemies[row_start:row_start + 3]
@@ -112,7 +113,7 @@ for row_start in range(0, len(enemies), 3):
     for c, enemy in zip(cols, row):
         with c:
             recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
-            enemy_tab(enemy, recs)
+            enemy_with_team_card(enemy, recs)
 
 
 #======== OLD Version ========#
