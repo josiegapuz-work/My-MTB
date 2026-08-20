@@ -103,6 +103,9 @@ if not owned:
 
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
+st.write(f"{enemies}")
+
+
 for row_start in range(0, len(enemies), 3):
     row = enemies[row_start:row_start + 3]
     cols = st.columns(len(row))
