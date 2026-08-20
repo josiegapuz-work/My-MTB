@@ -18,7 +18,7 @@ from card import *
 # -------------------------
 # Streamlit UI
 # -------------------------
-st.set_page_config(page_title="Mezastar Team Builder", layout="wide")
+st.set_page_config(page_title="Mezastar Team Builder", layout="wide", initial_sidebar_state="expanded")
 st.title("Pokemon Mezastar Team Builder")
 
 # Load tags
@@ -91,22 +91,26 @@ else:
     enemies = [name_map[n] for n in enemy_choices if n in name_map]
 
 # ========= Main UI: show merged cards ========= #
-st.subheader("Selected Enemies and Recommended Pokemon")
 
-if not owned:
-    st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
-    st.stop()
 
-owned_tags = [name_map[n] for n in owned if n in name_map]
+# st.subheader("Selected Enemies and Recommended Pokemon")
 
-# Render merged cards in rows of 3 (responsive)
-for row_start in range(0, len(enemies), 3):
-    row = enemies[row_start:row_start + 3]
-    cols = st.columns(len(row))
-    for c, enemy in zip(cols, row):
-        with c:
-            recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
-            enemy_with_team_card(enemy, recs)
+# if not owned:
+#     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
+#     st.stop()
 
-st.markdown("---")
-st.info("Type effectiveness dominates the ranking, then attack, then speed.")
+# owned_tags = [name_map[n] for n in owned if n in name_map]
+
+# # Render merged cards in rows of 3 (responsive)
+# for row_start in range(0, len(enemies), 3):
+#     row = enemies[row_start:row_start + 3]
+#     cols = st.columns(len(row))
+#     for c, enemy in zip(cols, row):
+#         with c:
+#             recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
+#             enemy_with_team_card(enemy, recs)
+
+# st.markdown("---")
+# st.info("Type effectiveness dominates the ranking, then attack, then speed.")
+
+
