@@ -82,16 +82,37 @@ else:
 
 # Enemy selection
 st.sidebar.header("Enemies to Battle")
-enemy_mode = st.sidebar.radio("Choose enemies", ["Random 3", "Pick manually"])
-if enemy_mode == "Random 3":
-    import random
-    enemies = random.sample(tags, k=3) if len(tags) >= 3 else tags
-else:
-    enemy_choices = st.sidebar.multiselect("Pick up to 3 enemies", options=all_names, max_selections=3, default=all_names[:3])
-    enemies = [name_map[n] for n in enemy_choices if n in name_map]
+
+# enemy_mode = st.sidebar.radio("Choose enemies", ["Random 3", "Pick manually"])
+# if enemy_mode == "Random 3":
+#     import random
+#     enemies = random.sample(tags, k=3) if len(tags) >= 3 else tags
+# else:
+
+# Pick up to 3 enemies
+enemy_choices = st.sidebar.multiselect("Pick up to 3 enemies", options=all_names, max_selections=3, default=all_names[:3])
+enemies = [name_map[n] for n in enemy_choices if n in name_map]
 
 # ========= Main UI: show merged cards ========= #
 
+st.subheader("Your Enemies")
+
+if not owned:
+    st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
+    st.stop()
+
+owned_tags = [name_map[n] for n in owned if n in name_map]
+
+for row_start in range(0, len(enemies), 3):
+    row = enemies[row_start:row_start + 3]
+    cols = st.columns(len(row))
+    for c, enemy in zip(cols, row):
+        with c:
+            recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
+            enemy_tab(enemy, recs)
+
+
+#======== OLD Version ========#
 
 # st.subheader("Selected Enemies and Recommended Pokemon")
 

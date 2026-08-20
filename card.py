@@ -75,3 +75,6 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
                     stats[1].metric("Speed", r.get("speed", 0))
                     st.metric("Score", r.get("score", 0))
         st.markdown("---")
+
+def enemy_tab(enemy: Dict[str, Any], recommendations: List[Dict[str, Any]]):
+    enemy1, enemy2, enemy3 = st.tabs([f"{enemy.get('name')}", f"{enemy.get('name')}", f"{enemy.get('name')}"])
