@@ -108,20 +108,19 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
 
         # Each recommendation in its own row
         for r in recommendations:
-            rec_row = st.columns([2, 2, 2])  # Name | Picture | Type
+            st.write(f"**{r.get('name')}**")
+            rec_row = st.columns([2, 2])  # Name | Picture | Type
             with rec_row[0]:
-                st.write(f"**{r.get('name')}**")
-            with rec_row[1]:
                 img_path = get_tag_image_path(r.get("pokemon_id"))
                 try:
                     if img_path.exists():
                         img = Image.open(img_path)
-                        img = img.rotate(90)
-                        st.image(img, use_container_width=100)
+                        img = img.rotate(-90)
+                        st.image(img, use_container_width=True)
                     else:
                         st.write("(Image not found)")
                 except Exception as ex:
                     st.write("(Image failed to load)", ex)
-            with rec_row[2]:
+            with rec_row[1]:
                 show_types(r.get("types") or [])
         st.markdown("---")
