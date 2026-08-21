@@ -103,10 +103,6 @@ if not owned:
 
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
-# st.write(f"{enemies}")
-
-# enemy_tabs = st.tabs([f"{enemies[0].get('name')}", f"{enemies[1].get('name')}", f"{enemies[2].get('name')}"])
-
 # create up to 3 tabs, using placeholders if fewer enemies selected
 max_tabs = 3
 names = []
@@ -115,16 +111,18 @@ for i in range(max_tabs):
         names.append(enemies[i].get("name", "Unknown"))
     else:
         names.append(f"Select Enemy {i+1}")
+
 enemy1, enemy2, enemy3 = st.tabs(names)
 
 with enemy1:
-    for row_start in range(0, len(enemies), 3):
-        row = enemies[row_start:row_start + 3]
-        cols = st.columns(len(row))
-        for c, enemy in zip(cols, row):
-            with c:
-                recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
-                enemy_with_team_card(enemy, recs)
+    st.write(enemies)
+    # for row_start in range(0, len(enemies), 3):
+    #     row = enemies[row_start:row_start + 3]
+    #     cols = st.columns(len(row))
+    #     for c, enemy in zip(cols, row):
+    #         with c:
+    #             recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
+    #             enemy_with_team_card(enemy, recs)
 
 
 #======== OLD Version ========#
