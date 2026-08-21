@@ -115,9 +115,15 @@ for i in range(max_tabs):
 enemy1, enemy2, enemy3 = st.tabs(names)
 
 with enemy1:
-    st.write(enemies)
     recs = recommend_against_enemy(owned_tags, enemies[0], top_n=4)
     enemy_with_team_card(enemies[0], recs)
+
+with enemy2:
+    recs = recommend_against_enemy(owned_tags, enemies[1], top_n=4)
+    enemy_with_team_card(enemies[1], recs)
+with enemy3:
+    recs = recommend_against_enemy(owned_tags, enemies[2], top_n=4)
+    enemy_with_team_card(enemies[2], recs)
 
     
     # for row_start in range(0, len(enemies), 3):
