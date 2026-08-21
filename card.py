@@ -115,7 +115,9 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
                 img_path = get_tag_image_path(r.get("pokemon_id"))
                 try:
                     if img_path.exists():
-                        st.image(Image.open(img_path), width=100)
+                        img = Image.open(img_path)
+                        img = img.rotate(90)
+                        st.image(img, use_column_width=100)
                     else:
                         st.write("(Image not found)")
                 except Exception as ex:
