@@ -104,20 +104,17 @@ if not owned:
 owned_tags = [name_map[n] for n in owned if n in name_map]
 
 # create up to 3 tabs, using placeholders if fewer enemies selected
-# max_tabs = 3
-# names = []
-# for i in range(max_tabs):
-#     if i < len(enemies):
-#         names.append(enemies[i].get("name", "Unknown"))
-#     else:
-#         names.append(f"Select Enemy {i+1}")
+max_tabs = 3
+names = []
+for i in range(max_tabs):
+    if i < len(enemies):
+        names.append(enemies[i].get("name", "Unknown"))
+    else:
+        names.append(f"Select Enemy {i+1}")
 
-# Create one tab per enemy
-enemy_tabs = st.tabs([e.get("name", f"Enemy {i+1}") for i, e in enumerate(enemies)])
+enemy_tabs = st.tabs(names)
 
-# Loop through tabs and enemies together
 for tab, enemy in zip(enemy_tabs, enemies):
     with tab:
         recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
         enemy_with_team_card(enemy, recs)
-
