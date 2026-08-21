@@ -74,6 +74,7 @@ from get_images import *
 #         st.markdown("---")
 
 def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, Any]]):
+    st.write("Change happened?")
     with st.container():
         # Enemy header
         st.markdown(f"## {enemy.get('name')}")
