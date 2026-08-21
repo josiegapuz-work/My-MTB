@@ -8,12 +8,8 @@ from get_images import *
 # Combined card renderer
 # -------------------------
 def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, Any]]):
-    """
-    Single merged card: everything about the enemy, then underneath the recommended team.
-    Designed to be placed inside a column; three such cards can be shown side-by-side.
-    """
     with st.container():
-        st.markdown("---")
+        
         # Enemy header
         st.markdown(f"## {enemy.get('name')}")
         # Enemy image
