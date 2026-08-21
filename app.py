@@ -114,47 +114,18 @@ for i in range(max_tabs):
 
 enemy1, enemy2, enemy3 = st.tabs(names)
 
-with enemy1:
-    recs = recommend_against_enemy(owned_tags, enemies[0], top_n=4)
-    enemy_with_team_card(enemies[0], recs)
-
-with enemy2:
-    recs = recommend_against_enemy(owned_tags, enemies[1], top_n=4)
-    enemy_with_team_card(enemies[1], recs)
-with enemy3:
-    recs = recommend_against_enemy(owned_tags, enemies[2], top_n=4)
-    enemy_with_team_card(enemies[2], recs)
-
-    
-    # for row_start in range(0, len(enemies), 3):
-    #     row = enemies[row_start:row_start + 3]
-    #     cols = st.columns(len(row))
-    #     for c, enemy in zip(cols, row):
-    #         with c:
-    #             recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
-    #             enemy_with_team_card(enemy, recs)
-
-
-#======== OLD Version ========#
-
-# st.subheader("Selected Enemies and Recommended Pokemon")
-
-# if not owned:
-#     st.warning("You have not selected any owned tags. Select tags in the sidebar to get recommendations.")
-#     st.stop()
-
-# owned_tags = [name_map[n] for n in owned if n in name_map]
-
-# # Render merged cards in rows of 3 (responsive)
-# for row_start in range(0, len(enemies), 3):
-#     row = enemies[row_start:row_start + 3]
-#     cols = st.columns(len(row))
-#     for c, enemy in zip(cols, row):
-#         with c:
-#             recs = recommend_against_enemy(owned_tags, enemy, top_n=4)
-#             enemy_with_team_card(enemy, recs)
-
-# st.markdown("---")
-# st.info("Type effectiveness dominates the ranking, then attack, then speed.")
-
-
+for n in range(len(enemies)):
+    if n == 0:
+        with enemy1:
+            recs = recommend_against_enemy(owned_tags, enemies[0], top_n=4)
+            enemy_with_team_card(enemies[0], recs)
+    elif n == 1:
+        with enemy2:
+            recs = recommend_against_enemy(owned_tags, enemies[1], top_n=4)
+            enemy_with_team_card(enemies[1], recs)
+    elif n == 2:
+        with enemy3:
+            recs = recommend_against_enemy(owned_tags, enemies[2], top_n=4)
+            enemy_with_team_card(enemies[2], recs)
+    else:
+        break
