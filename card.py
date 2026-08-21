@@ -94,9 +94,9 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
         with row[0]:
             st.write("**Types**")
             show_types(enemy.get("types") or [])
-        row[1].metric("HP", enemy.get("hp"))
-        row[2].metric("Attack", enemy.get("attack"))
-        row[3].metric("Speed", enemy.get("speed"))
+        row[1].write("HP", enemy.get("hp"))
+        row[2].write("Attack", enemy.get("attack"))
+        row[3].write("Speed", enemy.get("speed"))
 
         st.markdown("----")
         st.markdown("**Recommended Pokémon**")
