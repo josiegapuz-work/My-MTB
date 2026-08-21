@@ -15,7 +15,7 @@ def show_types(types: List[str]):
         with c:
             try:
                 if img_path.exists():
-                    st.image(str(img_path), width=100)
+                    st.image(str(img_path), width=416)
                 else:
                     st.caption(t)
             except Exception:
