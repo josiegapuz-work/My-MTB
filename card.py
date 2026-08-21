@@ -117,7 +117,7 @@ def enemy_with_team_card(enemy: Dict[str, Any], recommendations: List[Dict[str, 
                     if img_path.exists():
                         img = Image.open(img_path)
                         img = img.rotate(90)
-                        st.image(img, use_column_width=100)
+                        st.image(img, use_container_width=100)
                     else:
                         st.write("(Image not found)")
                 except Exception as ex:
